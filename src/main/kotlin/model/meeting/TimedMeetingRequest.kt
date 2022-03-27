@@ -30,4 +30,8 @@ class TimedMeetingRequest(
         startTime, endTime,
         meetingRequest.features
     )
+
+    constructor(meeting: Meeting) : this(
+        meeting.title, meeting.description, meeting.participants, meeting.meetingOrganizer, meeting.purpose, meeting.start, meeting.end, meeting.features
+    )
 }

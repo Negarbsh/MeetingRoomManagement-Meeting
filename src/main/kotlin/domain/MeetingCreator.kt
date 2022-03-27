@@ -22,7 +22,9 @@ class MeetingCreator : Creator {
     override fun createFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
         val roomId: ObjectId? = roomSearcher.getBestRoomChoice(timedMeetingRequest)
         if (roomId != null) return insertMeetingInDb(timedMeetingRequest, roomId)
-        val (changedMeetings, meetingId) = createByReorganization(timedMeetingRequest)
+        val (changedMeetings, newRoomId) = createByReorganization(timedMeetingRequest)
+        if (newRoomId == null) return null
+        val meetingId = insertMeetingInDb(timedMeetingRequest, newRoomId)
         resetDB(changedMeetings)
         return meetingId
     }
@@ -30,13 +32,12 @@ class MeetingCreator : Creator {
     private fun createByReorganization(timedMeetingRequest: TimedMeetingRequest): Pair<HashMap<ObjectId, Meeting>?, ObjectId?> {
         val meetings = meetingDAO.getAllMeetings()
         val rooms: HashMap<ObjectId, Room> = roomDAO.getAllRooms()
-        val (changedMeetings, meetingId, roomId) = reorganizeHandler.reorganizeByMeeting(
+        val (changedMeetings, roomId) = reorganizeHandler.reorganizeByMeeting(
             meetings,
             rooms,
             timedMeetingRequest,
-            roomSearcher.getMaxCapacity(timedMeetingRequest.purpose)
         )
-        return Pair(changedMeetings, meetingId)
+        return Pair(changedMeetings, roomId)
     }
 
     private fun resetDB(overwritingMeetings: HashMap<ObjectId, Meeting>?) {
