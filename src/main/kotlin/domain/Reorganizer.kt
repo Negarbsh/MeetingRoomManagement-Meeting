@@ -15,8 +15,9 @@ interface Reorganizer {
     */
     fun reorganizeByMeeting(
         meetings: HashMap<ObjectId, Meeting>,
-        rooms: List<Room>,
-        timedMeetingRequest: TimedMeetingRequest
+        rooms: HashMap<ObjectId, Room>,
+        timedMeetingRequest: TimedMeetingRequest,
+        maxCapacity: Int = -1
     ): Triple<HashMap<ObjectId, Meeting>?, ObjectId?, ObjectId?>
     // new meetings, meetingId , roomId
     //todo check if it's needed to return the room Id

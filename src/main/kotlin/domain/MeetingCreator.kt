@@ -21,21 +21,22 @@ class MeetingCreator : Creator {
 
     override fun createFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
         val roomId: ObjectId? = roomSearcher.getBestRoomChoice(timedMeetingRequest)
-        if (roomId != null) return addMeetingToDB(timedMeetingRequest, roomId)
-        val (newMeetings, meetingId) = createByReorganization(timedMeetingRequest)
-        resetDB(newMeetings)
+        if (roomId != null) return insertMeetingInDb(timedMeetingRequest, roomId)
+        val (changedMeetings, meetingId) = createByReorganization(timedMeetingRequest)
+        resetDB(changedMeetings)
         return meetingId
     }
 
     private fun createByReorganization(timedMeetingRequest: TimedMeetingRequest): Pair<HashMap<ObjectId, Meeting>?, ObjectId?> {
         val meetings = meetingDAO.getAllMeetings()
-        val rooms: List<Room> = roomDAO.getAllRooms()
-        val (newMeetings, meetingId, roomId) = reorganizeHandler.reorganizeByMeeting(
+        val rooms: HashMap<ObjectId, Room> = roomDAO.getAllRooms()
+        val (changedMeetings, meetingId, roomId) = reorganizeHandler.reorganizeByMeeting(
             meetings,
             rooms,
-            timedMeetingRequest
+            timedMeetingRequest,
+            roomSearcher.getMaxCapacity(timedMeetingRequest.purpose)
         )
-        return Pair(newMeetings, meetingId)
+        return Pair(changedMeetings, meetingId)
     }
 
     private fun resetDB(overwritingMeetings: HashMap<ObjectId, Meeting>?) {
@@ -45,7 +46,8 @@ class MeetingCreator : Creator {
         }
     }
 
-    private fun addMeetingToDB(timedMeetingRequest: TimedMeetingRequest, roomId: ObjectId): ObjectId? {
+    /*Inserts the meeting in the database and returns the meetingId*/
+    private fun insertMeetingInDb(timedMeetingRequest: TimedMeetingRequest, roomId: ObjectId): ObjectId? {
         val meeting = Meeting(timedMeetingRequest, roomId)
         return meetingDAO.insert(meeting)
     }

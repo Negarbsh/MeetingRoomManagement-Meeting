@@ -7,8 +7,11 @@ import java.sql.Timestamp
 
 interface Creator {
 
+    /* if successful, returns the meeting id*/
+
     fun createFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId?
 
-    //Checks if we can hold the meeting after the "timeLowerBound", then returns the meetingId if successful
-    fun getEarliestMeetingChance(timeLowerBound : Timestamp?, meetingRequest: MeetingRequest): Pair<ObjectId, Timestamp>?
+    /*Checks if we can hold the meeting after the "timeLowerBound", then returns the meetingId if successful*/
+    fun getEarliestMeetingChance(timeLowerBound: Timestamp?, meetingRequest: MeetingRequest): Pair<ObjectId, Timestamp>?
+
 }
