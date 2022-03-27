@@ -9,8 +9,8 @@ interface Reorganizer {
 
     /*
     Gets a new meeting, the list of rooms, and the list of all meetings.
-    If it was possible to reorganize the other meetings to find a room for the new meeting,
-    returns an array of the  new meetings (it doesn't work with db), the meetingId for the new meeting and the room id.
+    If it was possible to reorganize the other meetings in a way to find a room for the new meeting,
+    returns an array of the changed meetings, the meetingId for the new meeting and the room id (it doesn't work with db).
     else, returns null
     */
     fun reorganizeByMeeting(
@@ -20,5 +20,4 @@ interface Reorganizer {
     ): Triple<HashMap<ObjectId, Meeting>?, ObjectId?, ObjectId?>
     // new meetings, meetingId , roomId
     //todo check if it's needed to return the room Id
-    //todo decide if we should return all the meetings or just the meetings that have changed
 }

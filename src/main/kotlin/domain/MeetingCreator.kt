@@ -20,7 +20,7 @@ class MeetingCreator : Creator {
     private val reorganizeHandler: Reorganizer = ReorganizeHandler()
 
     override fun createFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
-        val roomId: ObjectId? = roomSearcher.searchForRoom(timedMeetingRequest)
+        val roomId: ObjectId? = roomSearcher.getBestRoomChoice(timedMeetingRequest)
         if (roomId != null) return addMeetingToDB(timedMeetingRequest, roomId)
         val (newMeetings, meetingId) = createByReorganization(timedMeetingRequest)
         resetDB(newMeetings)
@@ -65,7 +65,7 @@ class MeetingCreator : Creator {
 
             if (!areParticipantsFree(meetingRequest.participants, startTime, endTime)) continue
             val timedMeetingRequest = TimedMeetingRequest(meetingRequest, startTime, endTime)
-            val roomId = roomSearcher.searchForRoom(timedMeetingRequest) ?: continue
+            val roomId = roomSearcher.getBestRoomChoice(timedMeetingRequest) ?: continue
             return Pair(roomId, startTime)
         }
         return null
