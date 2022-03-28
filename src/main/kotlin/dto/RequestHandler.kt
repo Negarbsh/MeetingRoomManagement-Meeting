@@ -1,32 +1,39 @@
 package dto
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.data.mongodb.util.BsonUtils.toJson
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import domain.Creator
+import domain.MeetingCreator
+import model.meeting.TimedMeetingRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.RequestBody
 
 class RequestHandler {
-    fun handleCreateMeeting(requestBody: String): ResponseEntity<String> {
-        println(requestBody)
-//        try {
-//            val meetingRequest = ObjectMapper().readValue(requestBody, MeetingRequest::class.java)
-//            print(meetingRequest)
-//        } catch (e: Exception) {
-//            println(e)
-//        }
+    private val mapper = jacksonObjectMapper()
+
+    fun handleCreateMeeting(theString: String, requestBody: Map<*, *>): ResponseEntity<String> {
+        try {
+            val request: TimedMeetingRequest = mapper.readValue(theString)
+            println(request)
+            val meetingCreator : Creator = MeetingCreator()
+            val meetingId = meetingCreator.createFixedTimeMeeting(request)
+            if(meetingId == null) return ResponseEntity("message: Meeting creation failed. Try choosing another time", HttpStatus.NOT_ACCEPTABLE) //TODO is the status correct?
+            return ResponseEntity("$meetingId", HttpStatus.CREATED)
+        } catch (e: Exception) {
+            println(e)
+            return ResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+        }
+    }
+
+    fun handleEarliestChance(requestBody: Map<*, *>): ResponseEntity<String> {
         return ResponseEntity("salam", HttpStatus.CREATED)
     }
 
-    fun handleEarliestChance(requestBody: RequestBody): ResponseEntity<String> {
-        return ResponseEntity("salam", HttpStatus.CREATED)
-    }
-
-    fun cancelMeeting(body: RequestBody): ResponseEntity<String> {
+    fun cancelMeeting(body: Map<*, *>): ResponseEntity<String> {
         TODO("Not yet implemented")
     }
 
-    fun editMeeting(body: RequestBody): ResponseEntity<String> {
+    fun editMeeting(body: Map<*, *>): ResponseEntity<String> {
         TODO("Not yet implemented")
     }
 }
