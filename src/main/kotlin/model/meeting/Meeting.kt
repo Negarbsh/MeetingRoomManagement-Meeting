@@ -3,9 +3,12 @@ package model.meeting
 import model.enums.Feature
 import model.enums.MeetingPurpose
 import org.bson.types.ObjectId
+import org.springframework.data.annotation.Id
 import java.sql.Timestamp
 
 class Meeting(
+    @Id
+    val meetingId: ObjectId? = null,
     val title: String,
     val description: String,
     val participants: List<Participant>,
@@ -17,27 +20,28 @@ class Meeting(
     var roomId: ObjectId
 ) {
     constructor(meetingRequest: TimedMeetingRequest, roomId: ObjectId) : this(
-        meetingRequest.title,
-        meetingRequest.description,
-        meetingRequest.participants,
-        meetingRequest.meetingOrganizer,
-        meetingRequest.purpose,
-        meetingRequest.startTime,
-        meetingRequest.endTime,
-        meetingRequest.features,
-        roomId
+        title = meetingRequest.title,
+        description = meetingRequest.description,
+        participants = meetingRequest.participants,
+        meetingOrganizer = meetingRequest.meetingOrganizer,
+        purpose = meetingRequest.purpose,
+        start = meetingRequest.startTime,
+        end = meetingRequest.endTime,
+        features = meetingRequest.features,
+        roomId = roomId
     )
 
     constructor(meeting : Meeting): this(
-        meeting.title,
-        meeting.description,
-        meeting.participants,
-        meeting.meetingOrganizer,
-        meeting.purpose,
-        meeting.start,
-        meeting.end,
-        meeting.features,
-        meeting.roomId
+        meetingId = meeting.meetingId,
+        title = meeting.title,
+        description = meeting.description,
+        participants = meeting.participants,
+        meetingOrganizer = meeting.meetingOrganizer,
+        purpose = meeting.purpose,
+        start = meeting.start,
+        end = meeting.end,
+        features = meeting.features,
+        roomId = meeting.roomId
     )
 
     val duration: Int = end.nanos - start.nanos

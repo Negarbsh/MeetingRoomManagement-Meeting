@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package roomPackage;
+
+service Room{
+  rpc GetCapacity(RoomIdRequest) returns (RoomCapacity){}
+  rpc GetAllRooms(GetAllRoomsParam) returns (AllRoomsInfo){}
+}
+
+message GetAllRoomsParam {}
+
+message AllRoomsInfo{
+  repeated RoomInfo rooms = 1;
+}
+
+message RoomInfo{
+  string name = 1;
+  int32 capacity = 2;
+  Office office = 3;
+  repeated Feature features = 4;
+}
+
+enum Office{
+  TEHRAN = 0;
+  MASHHAD = 1;
+  SHIRAZ = 2;
+}
+
+enum Feature{
+  WHITE_BOARD = 0;
+  PROJECTOR = 1;
+  SOUND_PROOF = 2;
+}
+
+message RoomIdRequest {
+  int64 id = 1;
+}
+
+message RoomCapacity {
+  int32 capacity = 1;
+}

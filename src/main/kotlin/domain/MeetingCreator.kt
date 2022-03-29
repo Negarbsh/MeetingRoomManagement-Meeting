@@ -1,7 +1,6 @@
 package domain
 
 import dao.MeetingCRUD
-import dao.MeetingRepository
 import dao.RoomReader
 import dao.RoomRepository
 import model.Room
@@ -10,12 +9,13 @@ import model.meeting.MeetingRequest
 import model.meeting.Participant
 import model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
+import org.springframework.stereotype.Service
 import java.sql.Timestamp
 import java.time.Instant
 
-class MeetingCreator : Creator {
-    private val roomSearcher: RoomSearch = RoomAllocator()
-    private val meetingDAO: MeetingCRUD = MeetingRepository()
+@Service
+class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
+    private val roomSearcher: RoomSearch = RoomAllocator(meetingDAO)
     private val roomDAO: RoomReader = RoomRepository()
     private val reorganizeHandler: Reorganizer = ReorganizeHandler()
 
@@ -29,28 +29,30 @@ class MeetingCreator : Creator {
         return meetingId
     }
 
-    private fun createByReorganization(timedMeetingRequest: TimedMeetingRequest): Pair<HashMap<ObjectId, Meeting>?, ObjectId?> {
+    private fun createByReorganization(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>?, ObjectId?> {
         val meetings = meetingDAO.getAllMeetings()
+//        val meetings = meetingDAO.findAll()
         val rooms: HashMap<ObjectId, Room> = roomDAO.getAllRooms()
-        val (changedMeetings, roomId) = reorganizeHandler.reorganizeByMeeting(
+        val (changedMeetings, newRoomId) = reorganizeHandler.reorganizeByMeeting(
             meetings,
             rooms,
             timedMeetingRequest,
         )
-        return Pair(changedMeetings, roomId)
+        return Pair(changedMeetings, newRoomId)
     }
 
-    private fun resetDB(overwritingMeetings: HashMap<ObjectId, Meeting>?) {
+    private fun resetDB(overwritingMeetings: List<Meeting>?) {
         if (overwritingMeetings == null) return
-        for ((id, meeting) in overwritingMeetings) {
-            meetingDAO.upsert(id, meeting)
+        for (meeting in overwritingMeetings) {
+//            meetingDAO.upsert(id, meeting)
+            meetingDAO.save(meeting) //todo will it be overwritten?
         }
     }
 
     /*Inserts the meeting in the database and returns the meetingId*/
     private fun insertMeetingInDb(timedMeetingRequest: TimedMeetingRequest, roomId: ObjectId): ObjectId? {
         val meeting = Meeting(timedMeetingRequest, roomId)
-        return meetingDAO.insert(meeting)
+        return meetingDAO.insert(meeting).meetingId
     }
 
     //todo It can be cleaner! + I'm not sure about 15 and 100...0

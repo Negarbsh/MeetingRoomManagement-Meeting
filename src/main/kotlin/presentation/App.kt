@@ -7,6 +7,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import com.google.gson.Gson
+import dao.MeetingCRUD
+import domain.MeetingCreator
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 
 
@@ -15,9 +18,9 @@ import org.springframework.http.HttpStatus
 
 @RestController
 @EnableAutoConfiguration
-class App {
+class App(@Autowired meetingDAO: MeetingCRUD) {
     val gson = Gson()
-    val requestHandler = RequestHandler()
+    val requestHandler = RequestHandler(meetingDAO)
 
     private fun getMapByRequest(body: String): Map<*, *>? {
         return try {
@@ -31,7 +34,7 @@ class App {
     @ResponseBody
     fun createMeeting(@RequestBody body: String): ResponseEntity<String> {
         val map = getMapByRequest(body) ?: return ResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-        return requestHandler.handleCreateMeeting(body, map)
+        return requestHandler.handleCreateMeeting(body)
     }
 
     @GetMapping("/meetingEarliestChance")
@@ -62,8 +65,6 @@ class App {
         @JvmStatic
         fun main(args: Array<String>) {
             SpringApplication.run(App::class.java, *args)
-//            val meetingRequest : TimedMeetingRequest = TimedMeetingRequest("sdf", "sdfd" , listOf(), MeetingOrganizer(), MeetingPurpose.GROOMING, Timestamp(12345), Timestamp(13456))
-//            println(meetingRequest.purpose)
         }
     }
 }
