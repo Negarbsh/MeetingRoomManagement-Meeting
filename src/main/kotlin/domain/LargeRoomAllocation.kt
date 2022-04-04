@@ -1,7 +1,9 @@
 package domain
 
 import model.enums.MeetingPurpose
+import org.springframework.stereotype.Service
 
+@Service
 class LargeRoomAllocation {
 
     fun getMaxCapacity(purpose: MeetingPurpose): Int {

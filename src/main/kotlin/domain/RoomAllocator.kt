@@ -1,17 +1,19 @@
 package domain
 
 import dao.MeetingCRUD
-import dao.MeetingRepository
 import dao.RoomReader
 import dao.RoomRepository
 import model.Room
 import model.meeting.Meeting
 import model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
+import org.springframework.stereotype.Service
+import java.sql.Timestamp
 
-class RoomAllocator : RoomSearch { // TODO: think for a better name!
+@Service
+class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think for a better name!
     private val roomDAO: RoomReader = RoomRepository()
-    private val meetingDAO: MeetingCRUD = MeetingRepository()
+//    private val meetingDAO: MeetingCRUD = MeetingRepository()
 
     /*
     * Along all possible rooms, optimizes the room with the least capacity*/
@@ -37,8 +39,8 @@ class RoomAllocator : RoomSearch { // TODO: think for a better name!
         val maxCapacity = LargeRoomAllocation().getMaxCapacity(purpose)
         val roomsPossibleByAttributes =
             roomDAO.searchRooms(meetingRequest.features, minCapacity = meetingRequest.population, maxCapacity)
-        val interferingMeetings = meetingDAO.getMeetingsInPeriod(meetingRequest.startTime, meetingRequest.endTime)
-        val busyRooms = getRoomIds(interferingMeetings.values)
+        val interferingMeetings = getMeetingsInPeriod(meetingRequest.startTime, meetingRequest.endTime, meetingDAO)
+        val busyRooms = getRoomIds(interferingMeetings)
         return roomsPossibleByAttributes.minus(busyRooms.toSet())
     }
 
@@ -48,5 +50,9 @@ class RoomAllocator : RoomSearch { // TODO: think for a better name!
             roomIds.add(meeting.roomId)
         }
         return roomIds
+    }
+
+    private fun getMeetingsInPeriod(startTime: Timestamp, endTime: Timestamp, meetingDAO: MeetingCRUD): List<Meeting> {
+        return meetingDAO.findAll() //todo query
     }
 }

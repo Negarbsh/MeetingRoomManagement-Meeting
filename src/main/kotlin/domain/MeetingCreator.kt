@@ -30,8 +30,8 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
     }
 
     private fun createByReorganization(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>?, ObjectId?> {
-        val meetings = meetingDAO.getAllMeetings()
-//        val meetings = meetingDAO.findAll()
+//        val meetings = meetingDAO.getAllMeetings()
+        val meetings = meetingDAO.findAll()
         val rooms: HashMap<ObjectId, Room> = roomDAO.getAllRooms()
         val (changedMeetings, newRoomId) = reorganizeHandler.reorganizeByMeeting(
             meetings,
@@ -81,12 +81,16 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
         startTime: Timestamp,
         endTime: Timestamp
     ): Boolean {
-        val meetingsToCheck = meetingDAO.getMeetingsInPeriod(startTime, endTime)
-        for ((_, meeting) in meetingsToCheck) {
+        val meetingsToCheck = getMeetingsInPeriod(startTime, endTime, meetingDAO)
+        for (meeting in meetingsToCheck) {
             val commonParticipants = meeting.participants.intersect(participants.toSet())
             if (commonParticipants.isNotEmpty()) return false
         }
         return true
+    }
+
+    private fun getMeetingsInPeriod(startTime: Timestamp, endTime: Timestamp, meetingDAO: MeetingCRUD): List<Meeting> {
+        return meetingDAO.findAll() //todo query
     }
 
 }

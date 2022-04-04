@@ -2,20 +2,21 @@ package dto
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import dao.MeetingCRUD
 import domain.Creator
 import domain.MeetingCreator
 import model.meeting.TimedMeetingRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
-class RequestHandler {
+class RequestHandler(val meetingDAO : MeetingCRUD) {
     private val mapper = jacksonObjectMapper()
 
-    fun handleCreateMeeting(theString: String, requestBody: Map<*, *>): ResponseEntity<String> {
+    fun handleCreateMeeting(createRequest: String): ResponseEntity<String> {
         try {
-            val request: TimedMeetingRequest = mapper.readValue(theString)
+            val request: TimedMeetingRequest = mapper.readValue(createRequest)
             println(request)
-            val meetingCreator : Creator = MeetingCreator()
+            val meetingCreator : Creator = MeetingCreator(meetingDAO)
             val meetingId = meetingCreator.createFixedTimeMeeting(request)
             if(meetingId == null) return ResponseEntity("message: Meeting creation failed. Try choosing another time", HttpStatus.NOT_ACCEPTABLE) //TODO is the status correct?
             return ResponseEntity("$meetingId", HttpStatus.CREATED)

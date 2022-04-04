@@ -3,22 +3,23 @@ package presentation
 import dto.RequestHandler
 import model.UserInfo
 import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import com.google.gson.Gson
 import dao.MeetingCRUD
-import domain.MeetingCreator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.http.HttpStatus
 
 
 //  TODO("check token")
 
 
-@RestController
-@EnableAutoConfiguration
-class App(@Autowired meetingDAO: MeetingCRUD) {
+@org.springframework.web.bind.annotation.RestController
+class RestController(
+    @Autowired
+    meetingDAO: MeetingCRUD
+) {
     val gson = Gson()
     val requestHandler = RequestHandler(meetingDAO)
 
@@ -61,10 +62,10 @@ class App(@Autowired meetingDAO: MeetingCRUD) {
         TODO("Not yet implemented")
     }
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            SpringApplication.run(App::class.java, *args)
-        }
-    }
+//    companion object {
+//        @JvmStatic
+//        fun main(args: Array<String>) {
+//            SpringApplication.run(RestController::class.java, *args)
+//        }
+//    }
 }
