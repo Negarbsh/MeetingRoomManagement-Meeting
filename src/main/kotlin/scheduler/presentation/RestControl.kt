@@ -5,27 +5,28 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.HandlerInterceptor
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import scheduler.dao.MeetingCRUD
 import scheduler.domain.create.Creator
 import scheduler.domain.edit.MeetingEdit
 import scheduler.domain.read.MeetingRead
 import scheduler.model.MeetingSearchRequest
-import scheduler.model.meeting.Meeting
 import scheduler.model.meeting.MeetingEditRequest
 import scheduler.model.meeting.MeetingRequest
 import scheduler.model.meeting.TimedMeetingRequest
 import java.util.stream.Collectors
-
-
-//  TODO("check token")
 
 @RestController
 class RestControl(
     @Autowired val meetingEditor: MeetingEdit,
     @Autowired val meetingCreator: Creator,
     @Autowired val reader: MeetingRead,
-    @Autowired val meetingCRUD: MeetingCRUD
-) {
+    @Autowired val meetingCRUD: MeetingCRUD,
+    @Autowired val myInter : HandlerInterceptor
+
+) : WebMvcConfigurer{
 
     @PostMapping("/createMeeting")
     @ResponseBody
@@ -76,5 +77,9 @@ class RestControl(
         return ResponseEntity(listString, HttpStatus.OK)
     }
 
+    override fun addInterceptors(registry: InterceptorRegistry) {
+        super.addInterceptors(registry)
+        registry.addInterceptor(myInter)
+    }
 
 }

@@ -28,6 +28,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.7")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("io.grpc:grpc-kotlin-stub:1.0.0")
+    implementation("io.jsonwebtoken:jjwt:0.9.1")
 }
 
 tasks.withType<KotlinCompile> {
