@@ -1,4 +1,4 @@
-package scheduler.domain
+package scheduler.domain.create.reorganizing
 
 import scheduler.model.meeting.Meeting
 import scheduler.model.Room

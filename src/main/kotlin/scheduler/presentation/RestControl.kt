@@ -1,16 +1,20 @@
 package scheduler.presentation
 
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
 import org.bson.types.ObjectId
-import scheduler.dao.MeetingCRUD
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import scheduler.domain.Creator
-import scheduler.domain.MeetingEdit
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import scheduler.dao.MeetingCRUD
+import scheduler.domain.create.Creator
+import scheduler.domain.edit.MeetingEdit
+import scheduler.domain.read.MeetingRead
+import scheduler.model.MeetingSearchRequest
+import scheduler.model.meeting.Meeting
 import scheduler.model.meeting.MeetingEditRequest
 import scheduler.model.meeting.MeetingRequest
 import scheduler.model.meeting.TimedMeetingRequest
+import java.util.stream.Collectors
 
 
 //  TODO("check token")
@@ -18,7 +22,9 @@ import scheduler.model.meeting.TimedMeetingRequest
 @RestController
 class RestControl(
     @Autowired val meetingEditor: MeetingEdit,
-    @Autowired val meetingCreator: Creator
+    @Autowired val meetingCreator: Creator,
+    @Autowired val reader: MeetingRead,
+    @Autowired val meetingCRUD: MeetingCRUD
 ) {
 
     @PostMapping("/createMeeting")
@@ -46,7 +52,7 @@ class RestControl(
     fun cancel(@RequestBody meetingId: ObjectId): ResponseEntity<String> {
         val isCanceled = meetingEditor.cancelMeeting(meetingId)
         if (isCanceled)
-            return ResponseEntity(HttpStatus.CREATED)
+            return ResponseEntity(HttpStatus.OK)
         return ResponseEntity(HttpStatus.CONFLICT)
     }
 
@@ -57,7 +63,18 @@ class RestControl(
     ): ResponseEntity<String> {
         val isEdited = meetingEditor.editMeeting(editRequest, userMail)
         if (isEdited)
-            return ResponseEntity(HttpStatus.CREATED)
+            return ResponseEntity(HttpStatus.OK)
         return ResponseEntity(HttpStatus.CONFLICT)
     }
+
+    @GetMapping("/searchMeetings")
+    fun getMeetings(@RequestBody meetingSearchRequest: MeetingSearchRequest): ResponseEntity<String> {
+        val meetings = reader.getByPeriod(meetingSearchRequest, meetingCRUD)
+        val listString: String = meetings.stream().map { obj: Any -> obj.toString() }
+            .collect(Collectors.joining(",\n"))
+
+        return ResponseEntity(listString, HttpStatus.OK)
+    }
+
+
 }

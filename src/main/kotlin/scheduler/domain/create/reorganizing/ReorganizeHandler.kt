@@ -1,4 +1,4 @@
-package scheduler.domain
+package scheduler.domain.create.reorganizing
 
 import scheduler.model.meeting.Meeting
 import scheduler.model.Room
@@ -6,6 +6,7 @@ import scheduler.model.enums.Feature
 import scheduler.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import scheduler.domain.room.LargeRoomAllocation
 import java.sql.Timestamp
 
 @Service

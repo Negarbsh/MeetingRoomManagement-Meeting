@@ -1,4 +1,4 @@
-package scheduler.domain
+package scheduler.domain.edit
 
 import org.bson.types.ObjectId
 import scheduler.model.meeting.MeetingEditRequest

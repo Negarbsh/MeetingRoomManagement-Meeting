@@ -1,4 +1,4 @@
-package scheduler.domain
+package scheduler.domain.create
 
 import scheduler.dao.MeetingCRUD
 import scheduler.dao.RoomReader
@@ -10,7 +10,11 @@ import scheduler.model.meeting.Participant
 import scheduler.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import scheduler.domain.create.reorganizing.ReorganizeHandler
+import scheduler.domain.create.reorganizing.Reorganizer
 import scheduler.domain.mail.MailSender
+import scheduler.domain.room.RoomAllocator
+import scheduler.domain.room.RoomSearch
 import java.sql.Timestamp
 import java.time.Instant
 

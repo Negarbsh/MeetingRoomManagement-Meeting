@@ -1,4 +1,4 @@
-package scheduler.domain
+package scheduler.domain.room
 
 import scheduler.dao.MeetingCRUD
 import scheduler.dao.RoomReader

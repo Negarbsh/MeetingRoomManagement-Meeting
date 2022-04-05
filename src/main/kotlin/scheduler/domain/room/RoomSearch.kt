@@ -1,4 +1,4 @@
-package scheduler.domain
+package scheduler.domain.room
 
 import scheduler.model.Room
 import scheduler.model.meeting.TimedMeetingRequest

@@ -1,4 +1,4 @@
-package scheduler.domain
+package scheduler.domain.room
 
 import scheduler.model.enums.MeetingPurpose
 import org.springframework.stereotype.Service

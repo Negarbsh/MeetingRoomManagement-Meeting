@@ -34,7 +34,7 @@ class Meeting(
         roomId = roomId
     )
 
-    constructor(meeting : Meeting): this(
+    constructor(meeting: Meeting) : this(
         meetingId = meeting.meetingId,
         title = meeting.title,
         description = meeting.description,
@@ -49,4 +49,14 @@ class Meeting(
 
     val duration: Int = end.nanos - start.nanos
     val population = participants.size
+
+    override fun toString(): String {
+        return "id: $meetingId\n" +
+                "title: $title\n" +
+                "description: $description\n" +
+                "participants: $participants\n" +
+                "purpose: $purpose\n" +
+                "start: $start - end: $end\n" +
+                "roomId: $roomId"
+    }
 }
