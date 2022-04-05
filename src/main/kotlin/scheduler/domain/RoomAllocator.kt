@@ -21,11 +21,11 @@ class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think f
         val possibleRooms = getAllPossibleRooms(meetingRequest)
         var bestRoomId: ObjectId? = null
         var minCapacity = -1
-        for ((id, room) in possibleRooms) {
+        for (room in possibleRooms) {
             val capacity = room.capacity
             if (minCapacity == -1 || minCapacity > capacity) {
                 minCapacity = capacity
-                bestRoomId = id
+                bestRoomId = room.id
             }
         }
         return bestRoomId
@@ -34,17 +34,21 @@ class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think f
     /*
     * Finds all possible rooms for one meeting, regardless of optimization
     * If the meeting is for an interview or a PD-chat, only small rooms are possible */
-    override fun getAllPossibleRooms(meetingRequest: TimedMeetingRequest): Map<ObjectId, Room> {
+    override fun getAllPossibleRooms(meetingRequest: TimedMeetingRequest): List<Room> {
         val purpose = meetingRequest.purpose
         val maxCapacity = LargeRoomAllocation().getMaxCapacity(purpose)
         val roomsPossibleByAttributes =
             roomDAO.searchRooms(meetingRequest.features, minCapacity = meetingRequest.population, maxCapacity)
         val interferingMeetings = getMeetingsInPeriod(meetingRequest.startTime, meetingRequest.endTime, meetingDAO)
-        val busyRooms = getRoomIds(interferingMeetings)
-        return roomsPossibleByAttributes.minus(busyRooms.toSet())
+        val busyRooms = getMeetingRooms(interferingMeetings)
+        return roomsPossibleByAttributes.minus(getRoomsById(busyRooms).toSet())
     }
 
-    private fun getRoomIds(meetings: Collection<Meeting>): List<ObjectId> {
+    private fun getRoomsById(busyRooms: List<ObjectId>): List<Room> {
+        TODO("Not yet implemented")
+    }
+
+    private fun getMeetingRooms(meetings: Collection<Meeting>): List<ObjectId> {
         val roomIds = mutableListOf<ObjectId>()
         for (meeting in meetings) {
             roomIds.add(meeting.roomId)

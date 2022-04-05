@@ -13,7 +13,7 @@ class ReorganizeHandler : Reorganizer {
 
     override fun reorganizeByMeeting(
         meetings: List<Meeting>,
-        rooms: HashMap<ObjectId, Room>,
+        rooms: List<Room>,
         timedMeetingRequest: TimedMeetingRequest
     ): Pair<List<Meeting>?, ObjectId?> {
         // new meetings , room id
@@ -26,30 +26,30 @@ class ReorganizeHandler : Reorganizer {
     }
 
     private fun checkReassignment(
-        emptyRooms: HashMap<ObjectId, Room>,
-        roomsPossibleByAttributes: HashMap<ObjectId, Room>,
+        emptyRooms: List<Room>,
+        roomsPossibleByAttributes: List<Room>,
         meetings: List<Meeting>,
         timedMeetingRequest: TimedMeetingRequest,
         maxCapacity: Int
     ): Pair<List<Meeting>?, ObjectId?> {
         if (emptyRooms.isEmpty()) return Pair(null, null)
-        for ((roomId, candidateRoom) in roomsPossibleByAttributes) {
+        for (candidateRoom in roomsPossibleByAttributes) {
             val meetingsToChange = getInterferingMeetings(
-                roomId, candidateRoom, meetings, timedMeetingRequest.startTime, timedMeetingRequest.endTime
+                candidateRoom.id, candidateRoom, meetings, timedMeetingRequest.startTime, timedMeetingRequest.endTime
             )
             /*If the room was free at the time we want, no other meeting needs to change, and we're good to go!
             (in the simple algorithm for reorganization, this case never happens, but it may happen when we have the recursive implementation) */
-            if (meetingsToChange.isEmpty()) return Pair(null, roomId)
+            if (meetingsToChange.isEmpty()) return Pair(null, candidateRoom.id)
             /* for simplicity, we ignore the conditions where there are more than one meeting to change
             * */
             if (meetingsToChange.size > 1) continue
             val oldMeeting = meetingsToChange[0]
             val meetingToChange = Meeting(oldMeeting)
             val newMeetingRequest = TimedMeetingRequest(meetingToChange)
-            for ((emptyRoomId, emptyRoom) in emptyRooms) {
+            for (emptyRoom in emptyRooms) {
                 if (!doesRoomFitToMeeting(emptyRoom, newMeetingRequest, maxCapacity)) continue
                 //now we know the interfering meeting can be held in the empty room
-                meetingToChange.roomId = emptyRoomId
+                meetingToChange.roomId = emptyRoom.id
                 return Pair(listOf(meetingToChange), candidateRoom.id)
             }
         }
@@ -67,24 +67,24 @@ class ReorganizeHandler : Reorganizer {
     }
 
     private fun getEmptyRooms(
-        rooms: HashMap<ObjectId, Room>,
+        rooms: List<Room>,
         meetings: List<Meeting>,
         startTime: Timestamp,
         endTime: Timestamp
-    ): HashMap<ObjectId, Room> {
+    ): List<Room> {
         TODO("Not yet implemented")
     }
 
     //todo should this function be here?
     private fun searchRoomsByAttribute(
-        rooms: HashMap<ObjectId, Room>,
+        rooms: List<Room>,
         meetingRequest: TimedMeetingRequest,
         maxSize: Int
-    ): HashMap<ObjectId, Room> {
-        val possibleRooms = hashMapOf<ObjectId, Room>()
-        for ((id, room) in rooms) {
+    ): List<Room> {
+        val possibleRooms = arrayListOf<Room>()
+        for (room in rooms) {
             if (doesRoomFitToMeeting(room, meetingRequest, maxSize))
-                possibleRooms[id] = room
+                possibleRooms.add(room)
         }
         return possibleRooms
     }

@@ -1,69 +1,63 @@
 package scheduler.presentation
 
-import scheduler.dto.RequestHandler
-import scheduler.model.UserInfo
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import com.google.gson.Gson
+import org.bson.types.ObjectId
 import scheduler.dao.MeetingCRUD
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import scheduler.domain.Creator
+import scheduler.domain.MeetingEdit
+import scheduler.model.meeting.MeetingEditRequest
+import scheduler.model.meeting.MeetingRequest
+import scheduler.model.meeting.TimedMeetingRequest
 
 
 //  TODO("check token")
 
-
 @RestController
 class RestControl(
-    @Autowired
-    meetingDAO: MeetingCRUD
+    @Autowired val meetingEditor: MeetingEdit,
+    @Autowired val meetingCreator: Creator
 ) {
-    val gson = Gson()
-    val requestHandler = RequestHandler(meetingDAO)
-
-    private fun getMapByRequest(body: String): Map<*, *>? {
-        return try {
-            gson.fromJson(body, MutableMap::class.java)
-        } catch (e: Exception) {
-            null
-        }
-    }
 
     @PostMapping("/createMeeting")
     @ResponseBody
-    fun createMeeting(@RequestBody body: String): ResponseEntity<String> {
-        val map = getMapByRequest(body) ?: return ResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-        return requestHandler.handleCreateMeeting(body)
+    fun createMeeting(@RequestBody timedMeetingRequest: TimedMeetingRequest): ResponseEntity<String> {
+        val meetingId = meetingCreator.createFixedTimeMeeting(timedMeetingRequest)
+            ?: return ResponseEntity(
+                "Meeting creation failed. Try choosing another time",
+                HttpStatus.NOT_ACCEPTABLE               //TODO is the status correct?
+            )
+        return ResponseEntity("$meetingId", HttpStatus.CREATED)
     }
 
     @GetMapping("/meetingEarliestChance")
-    fun getMeetingEarliestChance(body: String): ResponseEntity<String> {
-        val map = getMapByRequest(body) ?: return ResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-        return requestHandler.handleEarliestChance(map)
+    fun getMeetingEarliestChance(@RequestBody meetingRequest: MeetingRequest): ResponseEntity<String> {
+        val response = meetingCreator.getEarliestMeetingChance(meetingRequest = meetingRequest)
+            ?: return ResponseEntity("No room is free for this meeting.", HttpStatus.NOT_ACCEPTABLE)
+        return ResponseEntity(
+            "Earliest chance is at ${response.second} in room with Id ${response.first}",
+            HttpStatus.ACCEPTED
+        )
     }
 
     @PutMapping("/cancel")
-    fun cancel(@RequestBody body: String, header: RequestHeader): ResponseEntity<String> {
-        val map = getMapByRequest(body) ?: return ResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-        return requestHandler.cancelMeeting(map)
+    fun cancel(@RequestBody meetingId: ObjectId): ResponseEntity<String> {
+        val isCanceled = meetingEditor.cancelMeeting(meetingId)
+        if (isCanceled)
+            return ResponseEntity(HttpStatus.CREATED)
+        return ResponseEntity(HttpStatus.CONFLICT)
     }
 
     @PutMapping("/edit")
-    fun edit(@RequestBody body: String, header: RequestHeader): ResponseEntity<String> {
-        var userInfo = getUserInfoByHeader(header)
-        val map = getMapByRequest(body) ?: return ResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-        return requestHandler.editMeeting(map)
+    fun edit(
+        @RequestBody editRequest: MeetingEditRequest,
+        @RequestHeader("user-mail") userMail: String
+    ): ResponseEntity<String> {
+        val isEdited = meetingEditor.editMeeting(editRequest, userMail)
+        if (isEdited)
+            return ResponseEntity(HttpStatus.CREATED)
+        return ResponseEntity(HttpStatus.CONFLICT)
     }
-
-
-    private fun getUserInfoByHeader(header: RequestHeader): UserInfo {
-        TODO("Not yet implemented")
-    }
-
-//    companion object {
-//        @JvmStatic
-//        fun main(args: Array<String>) {
-//            SpringApplication.run(RestController::class.java, *args)
-//        }
-//    }
 }

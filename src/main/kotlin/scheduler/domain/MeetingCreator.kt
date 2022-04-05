@@ -10,6 +10,7 @@ import scheduler.model.meeting.Participant
 import scheduler.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import scheduler.domain.mail.MailSender
 import java.sql.Timestamp
 import java.time.Instant
 
@@ -18,10 +19,12 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
     private val roomSearcher: RoomSearch = RoomAllocator(meetingDAO)
     private val roomDAO: RoomReader = RoomRepository()
     private val reorganizeHandler: Reorganizer = ReorganizeHandler()
+    private val mailSender: MailSender = MailSender()
 
     override fun createFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
         val roomId: ObjectId? = roomSearcher.getBestRoomChoice(timedMeetingRequest)
-        if (roomId != null) return insertMeetingInDb(timedMeetingRequest, roomId)
+        if (roomId != null)
+            return finalizeMeetingCreation(timedMeetingRequest, roomId)
         val (changedMeetings, newRoomId) = createByReorganization(timedMeetingRequest)
         if (newRoomId == null) return null
         val meetingId = insertMeetingInDb(timedMeetingRequest, newRoomId)
@@ -29,10 +32,17 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
         return meetingId
     }
 
+    private fun finalizeMeetingCreation(
+        timedMeetingRequest: TimedMeetingRequest,
+        roomId: ObjectId
+    ): ObjectId? {
+        mailSender.sendMail(timedMeetingRequest) //todo async
+        return insertMeetingInDb(timedMeetingRequest, roomId)
+    }
+
     private fun createByReorganization(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>?, ObjectId?> {
-//        val meetings = meetingDAO.getAllMeetings()
         val meetings = meetingDAO.findAll()
-        val rooms: HashMap<ObjectId, Room> = roomDAO.getAllRooms()
+        val rooms: List<Room> = roomDAO.getAllRooms()
         val (changedMeetings, newRoomId) = reorganizeHandler.reorganizeByMeeting(
             meetings,
             rooms,
@@ -44,7 +54,6 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
     private fun resetDB(overwritingMeetings: List<Meeting>?) {
         if (overwritingMeetings == null) return
         for (meeting in overwritingMeetings) {
-//            meetingDAO.upsert(id, meeting)
             meetingDAO.save(meeting) //todo will it be overwritten?
         }
     }

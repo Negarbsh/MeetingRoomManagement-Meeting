@@ -11,5 +11,5 @@ interface RoomSearch { // TODO:  think for a better name
     /*
     gets a timed meeting request, and finds all possible rooms for that request (regardless of optimization)
      */
-    fun getAllPossibleRooms(meetingRequest: TimedMeetingRequest): Map<ObjectId, Room>
+    fun getAllPossibleRooms(meetingRequest: TimedMeetingRequest): List<Room>
 }

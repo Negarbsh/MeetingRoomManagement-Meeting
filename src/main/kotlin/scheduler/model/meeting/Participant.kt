@@ -1,6 +1,5 @@
 package scheduler.model.meeting
 
-class Participant (val email: String) {
-}
+import com.fasterxml.jackson.annotation.JsonProperty
 
-
+data class Participant (@JsonProperty("Email") val email: String)

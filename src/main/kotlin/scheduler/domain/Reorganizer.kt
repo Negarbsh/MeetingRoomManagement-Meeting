@@ -15,7 +15,7 @@ interface Reorganizer {
     */
     fun reorganizeByMeeting(
         meetings: List<Meeting>,
-        rooms: HashMap<ObjectId, Room>,
+        rooms: List<Room>,
         timedMeetingRequest: TimedMeetingRequest
     ): Pair<List<Meeting>?, ObjectId?>
     // new meetings, roomId
