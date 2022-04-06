@@ -16,7 +16,7 @@ import java.sql.Timestamp
 import java.time.Instant
 
 @Service
-class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
+class AssignerImpl(private val meetingDAO: MeetingCRUD) : Assigner {
     private val roomSearcher: RoomSearch = RoomAllocator(meetingDAO)
     private val roomDAO: RoomReader = RoomRepository()
     private val reorganizeHandler: Reorganizer = ReorganizeHandler()

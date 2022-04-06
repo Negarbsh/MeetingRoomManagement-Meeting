@@ -16,10 +16,10 @@ interface MeetingService {
     ): Pair<ObjectId, Timestamp>?
 
     /* gets the editRequest and returns if the edit process was successful */
-    fun editMeeting(editRequest: MeetingEditRequest, editorMail: String): Boolean
+    fun edit(editRequest: MeetingEditRequest, editorMail: String): Boolean
 
     /* cancels the meeting with specified meetingId and returns true if it was successful */
-    fun cancelMeeting(meetingId: ObjectId): Boolean
+    fun cancel(meetingId: ObjectId): Boolean
 
     /* gets the search request and returns the matching meetings */
     fun searchMeeting(meetingSearchRequest: MeetingSearchRequest): List<Meeting>

@@ -5,7 +5,7 @@ import scheduler.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
 import java.sql.Timestamp
 
-interface Creator {
+interface Assigner {
 
     /* if successful, returns the meeting id*/
 
