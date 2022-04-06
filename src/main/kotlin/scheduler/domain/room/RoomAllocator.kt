@@ -13,7 +13,6 @@ import scheduler.model.meeting.TimeInterval
 @Service
 class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think for a better name!
     private val roomDAO: RoomReader = RoomRepository()
-//    private val meetingDAO: MeetingCRUD = MeetingRepository()
 
     /*
     * Along all possible rooms, optimizes the room with the least capacity*/
@@ -44,7 +43,7 @@ class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think f
         return roomsPossibleByAttributes.minus(getRoomsById(busyRooms).toSet())
     }
 
-    private fun getRoomsById(busyRooms: List<ObjectId>): List<Room> {
+    private fun getRoomsById(roomIds: List<ObjectId>): List<Room> {
         TODO("Not yet implemented")
     }
 

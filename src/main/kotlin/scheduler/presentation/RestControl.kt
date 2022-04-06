@@ -27,7 +27,7 @@ class RestControl(
     @Autowired val tokenInterceptor : HandlerInterceptor
 ) : WebMvcConfigurer{
 
-    @PostMapping("/createMeeting")
+    @PostMapping("/schedule")
     fun createMeeting(@RequestBody timedMeetingRequest: TimedMeetingRequest): ResponseEntity<String> {
         val meetingId = meetingCreator.createFixedTimeMeeting(timedMeetingRequest)
             ?: return ResponseEntity(
@@ -37,7 +37,7 @@ class RestControl(
         return ResponseEntity("$meetingId", HttpStatus.CREATED)
     }
 
-    @GetMapping("/meetingEarliestChance")
+    @GetMapping("/scheduleEarliestChance")
     fun getMeetingEarliestChance(@RequestBody meetingRequest: MeetingRequest): ResponseEntity<String> {
         val response = meetingCreator.getEarliestMeetingChance(meetingRequest = meetingRequest)
             ?: return ResponseEntity("No room is free for this meeting.", HttpStatus.NOT_ACCEPTABLE)
@@ -66,7 +66,7 @@ class RestControl(
         return ResponseEntity(HttpStatus.CONFLICT)
     }
 
-    @GetMapping("/searchMeetings")
+    @GetMapping("/searchMeeting")
     fun getMeetings(@RequestBody meetingSearchRequest: MeetingSearchRequest): ResponseEntity<String> {
         val meetings = reader.getByPeriod(meetingSearchRequest, meetingCRUD)
         val listString: String = meetings.stream().map { obj: Any -> obj.toString() }
