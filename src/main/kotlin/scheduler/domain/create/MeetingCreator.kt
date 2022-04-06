@@ -4,10 +4,6 @@ import scheduler.dao.MeetingCRUD
 import scheduler.dao.roomGrpc.RoomReader
 import scheduler.dao.roomGrpc.RoomRepository
 import scheduler.model.Room
-import scheduler.model.meeting.Meeting
-import scheduler.model.meeting.MeetingRequest
-import scheduler.model.meeting.Participant
-import scheduler.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import scheduler.domain.create.reorganizing.ReorganizeHandler
@@ -15,6 +11,7 @@ import scheduler.domain.create.reorganizing.Reorganizer
 import scheduler.domain.mail.MailSender
 import scheduler.domain.room.RoomAllocator
 import scheduler.domain.room.RoomSearch
+import scheduler.model.meeting.*
 import java.sql.Timestamp
 import java.time.Instant
 
@@ -81,8 +78,8 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
             startTime = Timestamp(startTime.time + 15 * 60 * 1000)
             val endTime = Timestamp(startTime.time + duration)
 
-            if (!areParticipantsFree(meetingRequest.participants, startTime, endTime)) continue
-            val timedMeetingRequest = TimedMeetingRequest(meetingRequest, startTime, endTime)
+            if (!areParticipantsFree(meetingRequest.participants, TimeInterval(startTime, endTime))) continue
+            val timedMeetingRequest = TimedMeetingRequest(meetingRequest, TimeInterval(startTime, endTime))
             val roomId = roomSearcher.getBestRoomChoice(timedMeetingRequest) ?: continue
             return Pair(roomId, startTime)
         }
@@ -91,10 +88,9 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
 
     private fun areParticipantsFree(
         participants: List<Participant>,
-        startTime: Timestamp,
-        endTime: Timestamp
+        timeInterval: TimeInterval
     ): Boolean {
-        val meetingsToCheck = getMeetingsInPeriod(startTime, endTime, meetingDAO)
+        val meetingsToCheck = getMeetingsInInterval(timeInterval, meetingDAO)
         for (meeting in meetingsToCheck) {
             val commonParticipants = meeting.participants.intersect(participants.toSet())
             if (commonParticipants.isNotEmpty()) return false
@@ -102,7 +98,7 @@ class MeetingCreator(private val meetingDAO: MeetingCRUD) : Creator {
         return true
     }
 
-    private fun getMeetingsInPeriod(startTime: Timestamp, endTime: Timestamp, meetingDAO: MeetingCRUD): List<Meeting> {
+    private fun getMeetingsInInterval(interval: TimeInterval, meetingDAO: MeetingCRUD): List<Meeting> {
         return meetingDAO.findAll() //todo query
     }
 

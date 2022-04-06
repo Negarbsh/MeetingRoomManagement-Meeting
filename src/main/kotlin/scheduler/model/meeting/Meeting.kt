@@ -5,7 +5,6 @@ import scheduler.model.enums.MeetingPurpose
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import java.sql.Timestamp
 
 
 @Document(collection = "meetings")
@@ -17,8 +16,7 @@ class Meeting(
     val participants: List<Participant>,
     val meetingOrganizer: MeetingOrganizer,
     val purpose: MeetingPurpose,
-    val start: Timestamp,
-    val end: Timestamp,
+    val timeInterval: TimeInterval,
     val features: List<Feature>?,
     var roomId: ObjectId
 ) {
@@ -28,8 +26,7 @@ class Meeting(
         participants = meetingRequest.participants,
         meetingOrganizer = meetingRequest.meetingOrganizer,
         purpose = meetingRequest.purpose,
-        start = meetingRequest.startTime,
-        end = meetingRequest.endTime,
+        timeInterval = meetingRequest.timeInterval,
         features = meetingRequest.features,
         roomId = roomId
     )
@@ -41,13 +38,12 @@ class Meeting(
         participants = meeting.participants,
         meetingOrganizer = meeting.meetingOrganizer,
         purpose = meeting.purpose,
-        start = meeting.start,
-        end = meeting.end,
+        timeInterval = meeting.timeInterval,
         features = meeting.features,
         roomId = meeting.roomId
     )
 
-    val duration: Int = end.nanos - start.nanos
+    val duration: Int = timeInterval.duration
     val population = participants.size
 
     override fun toString(): String {
@@ -56,7 +52,7 @@ class Meeting(
                 "description: $description\n" +
                 "participants: $participants\n" +
                 "purpose: $purpose\n" +
-                "start: $start - end: $end\n" +
+                "start: ${timeInterval.start} - end: ${timeInterval.end}\n" +
                 "roomId: $roomId"
     }
 }

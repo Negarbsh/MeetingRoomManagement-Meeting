@@ -8,7 +8,7 @@ import scheduler.model.meeting.Meeting
 import scheduler.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
-import java.sql.Timestamp
+import scheduler.model.meeting.TimeInterval
 
 @Service
 class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think for a better name!
@@ -39,7 +39,7 @@ class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think f
         val maxCapacity = LargeRoomAllocation().getMaxCapacity(purpose)
         val roomsPossibleByAttributes =
             roomDAO.searchRooms(meetingRequest.features, minCapacity = meetingRequest.population, maxCapacity)
-        val interferingMeetings = getMeetingsInPeriod(meetingRequest.startTime, meetingRequest.endTime, meetingDAO)
+        val interferingMeetings = getMeetingsInInterval(meetingRequest.timeInterval, meetingDAO)
         val busyRooms = getMeetingRooms(interferingMeetings)
         return roomsPossibleByAttributes.minus(getRoomsById(busyRooms).toSet())
     }
@@ -56,7 +56,7 @@ class RoomAllocator(val meetingDAO: MeetingCRUD) : RoomSearch { // TODO: think f
         return roomIds
     }
 
-    private fun getMeetingsInPeriod(startTime: Timestamp, endTime: Timestamp, meetingDAO: MeetingCRUD): List<Meeting> {
+    private fun getMeetingsInInterval(timeInterval: TimeInterval,  meetingDAO: MeetingCRUD): List<Meeting> {
         return meetingDAO.findAll() //todo query
     }
 }

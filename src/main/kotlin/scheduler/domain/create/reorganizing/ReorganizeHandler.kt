@@ -7,7 +7,7 @@ import scheduler.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import scheduler.domain.room.LargeRoomAllocation
-import java.sql.Timestamp
+import scheduler.model.meeting.TimeInterval
 
 @Service
 class ReorganizeHandler : Reorganizer {
@@ -21,7 +21,7 @@ class ReorganizeHandler : Reorganizer {
         val maxCapacity = LargeRoomAllocation().getMaxCapacity(timedMeetingRequest.purpose)
         val roomsPossibleByAttributes = searchRoomsByAttribute(rooms, timedMeetingRequest, maxCapacity)
         val emptyRooms = getEmptyRooms(
-            rooms, meetings, timedMeetingRequest.startTime, timedMeetingRequest.endTime
+            rooms, meetings, timedMeetingRequest.timeInterval
         )
         return checkReassignment(emptyRooms, roomsPossibleByAttributes, meetings, timedMeetingRequest, maxCapacity)
     }
@@ -36,7 +36,7 @@ class ReorganizeHandler : Reorganizer {
         if (emptyRooms.isEmpty()) return Pair(null, null)
         for (candidateRoom in roomsPossibleByAttributes) {
             val meetingsToChange = getInterferingMeetings(
-                candidateRoom.id, candidateRoom, meetings, timedMeetingRequest.startTime, timedMeetingRequest.endTime
+                candidateRoom.id, candidateRoom, meetings, timedMeetingRequest.timeInterval
             )
             /*If the room was free at the time we want, no other meeting needs to change, and we're good to go!
             (in the simple algorithm for reorganization, this case never happens, but it may happen when we have the recursive implementation) */
@@ -61,8 +61,7 @@ class ReorganizeHandler : Reorganizer {
         roomId: ObjectId,
         roomToCheck: Room,
         allMeetings: List<Meeting>,
-        startTime: Timestamp,
-        endTime: Timestamp
+        interval: TimeInterval
     ): List<Meeting> {
         TODO("Not yet implemented")
     }
@@ -70,8 +69,7 @@ class ReorganizeHandler : Reorganizer {
     private fun getEmptyRooms(
         rooms: List<Room>,
         meetings: List<Meeting>,
-        startTime: Timestamp,
-        endTime: Timestamp
+        interval: TimeInterval
     ): List<Room> {
         TODO("Not yet implemented")
     }

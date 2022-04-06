@@ -1,7 +1,7 @@
 package scheduler.model
 
 import org.bson.types.ObjectId
-import java.sql.Timestamp
+import scheduler.model.meeting.TimeInterval
 
-class MeetingSearchRequest (val startTime: Timestamp, val endTime : Timestamp, val roomId: ObjectId? = null){
+class MeetingSearchRequest(val timeInterval: TimeInterval, val roomId: ObjectId? = null) {
 }
