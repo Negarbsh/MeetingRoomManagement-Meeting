@@ -11,7 +11,7 @@ import java.sql.Timestamp
 @Document(collection = "meetings")
 class Meeting(
     @Id
-    val meetingId: ObjectId? = null,
+    var meetingId: ObjectId? = null,
     val title: String,
     val description: String,
     val participants: List<Participant>,

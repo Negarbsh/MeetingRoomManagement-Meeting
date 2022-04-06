@@ -5,6 +5,5 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
-//@Component
 @Repository
 interface MeetingCRUD : MongoRepository<Meeting, ObjectId>

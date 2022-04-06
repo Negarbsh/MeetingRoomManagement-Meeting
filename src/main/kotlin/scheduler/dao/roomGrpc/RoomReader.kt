@@ -1,4 +1,4 @@
-package scheduler.dao
+package scheduler.dao.roomGrpc
 
 import scheduler.model.Room
 import scheduler.model.enums.Feature

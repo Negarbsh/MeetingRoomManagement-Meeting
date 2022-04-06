@@ -11,7 +11,6 @@ class TokenInterceptor : HandlerInterceptor {
     val tokenHandler : TokenHandler = TokenHandlerImpl()
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        print(request.method)
         return try {
             tokenHandler.checkJWTToken(request, response)
             true

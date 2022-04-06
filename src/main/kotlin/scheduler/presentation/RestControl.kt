@@ -24,12 +24,10 @@ class RestControl(
     @Autowired val meetingCreator: Creator,
     @Autowired val reader: MeetingRead,
     @Autowired val meetingCRUD: MeetingCRUD,
-    @Autowired val myInter : HandlerInterceptor
-
+    @Autowired val tokenInterceptor : HandlerInterceptor
 ) : WebMvcConfigurer{
 
     @PostMapping("/createMeeting")
-    @ResponseBody
     fun createMeeting(@RequestBody timedMeetingRequest: TimedMeetingRequest): ResponseEntity<String> {
         val meetingId = meetingCreator.createFixedTimeMeeting(timedMeetingRequest)
             ?: return ResponseEntity(
@@ -73,13 +71,12 @@ class RestControl(
         val meetings = reader.getByPeriod(meetingSearchRequest, meetingCRUD)
         val listString: String = meetings.stream().map { obj: Any -> obj.toString() }
             .collect(Collectors.joining(",\n"))
-
         return ResponseEntity(listString, HttpStatus.OK)
     }
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         super.addInterceptors(registry)
-        registry.addInterceptor(myInter)
+        registry.addInterceptor(tokenInterceptor)
     }
 
 }

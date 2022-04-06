@@ -18,6 +18,11 @@ message RoomInfo{
   int32 capacity = 2;
   Office office = 3;
   repeated Feature features = 4;
+  ObjectId id = 5;
+}
+
+message ObjectId {
+  string hexString = 1;
 }
 
 enum Office{

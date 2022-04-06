@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.google.protobuf.gradle.protoc
+import com.google.protobuf.gradle.*
 
 plugins {
     id("org.springframework.boot") version "2.6.6"
@@ -19,17 +19,49 @@ repositories {
 }
 
 dependencies {
+
+    implementation("io.grpc:grpc-netty-shaded:1.45.0")
+    implementation("io.grpc:grpc-protobuf:1.45.0")
+    implementation("io.grpc:grpc-stub:1.45.0")
+
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.google.code.gson:gson:2.8.7")
+    implementation("com.google.code.gson:gson:2.9.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("io.grpc:grpc-kotlin-stub:1.0.0")
+
+    implementation("io.grpc:grpc-kotlin-stub:1.2.1")
     implementation("io.jsonwebtoken:jjwt:0.9.1")
+
+    compileOnly("jakarta.annotation:jakarta.annotation-api:1.3.5") // Java 9+ compatibility - Do NOT update to 2.0.0
+    implementation("net.devh:grpc-client-spring-boot-starter:2.12.0.RELEASE")
+
 }
+
+protobuf {
+
+    plugins {
+        id("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.20.0"
+        }
+        id("grpckt") {
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.1.0:jdk7@jar"
+        }
+    }
+    generateProtoTasks {
+        ofSourceSet("main").forEach {
+            it.plugins {
+                // Apply the "grpc" plugin whose spec is defined above, without options.
+                id("grpc")
+                id("grpckt")
+            }
+        }
+    }
+}
+
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -42,11 +74,20 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+tasks.withType<ProcessResources> {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 sourceSets {
     main {
         proto {
-            srcDir("src/main/resources/proto")
+            srcDir("src/main/proto")
         }
     }
+}
+
+java.sourceSets["main"].java {
+    srcDir("build/generated/source/proto/main/java")
+    srcDir("build/generated/source/proto/main/grpc")
 }
 

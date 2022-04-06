@@ -7,7 +7,15 @@ import scheduler.model.meeting.Meeting
 
 @Component
 class MeetingReader : MeetingRead {
-    override fun getByPeriod(meetingSearchRequest: MeetingSearchRequest?, meetingCRUD: MeetingCRUD): List<Meeting> {
-        TODO("Not yet implemented")
+    //todo move to dao layer
+    override fun getByPeriod(meetingSearchRequest: MeetingSearchRequest?, meetingRepo: MeetingCRUD): List<Meeting> {
+        if (meetingSearchRequest == null) return listOf()
+        val meetings = meetingRepo.findAll()
+        val searchResult = arrayListOf<Meeting>()
+        for (meeting in meetings) {
+            if (meeting.start.after(meetingSearchRequest.startTime) and meeting.end.before(meetingSearchRequest.endTime))
+                searchResult.add(meeting)
+        }
+        return searchResult
     }
 }

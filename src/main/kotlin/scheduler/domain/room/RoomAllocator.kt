@@ -1,8 +1,8 @@
 package scheduler.domain.room
 
 import scheduler.dao.MeetingCRUD
-import scheduler.dao.RoomReader
-import scheduler.dao.RoomRepository
+import scheduler.dao.roomGrpc.RoomReader
+import scheduler.dao.roomGrpc.RoomRepository
 import scheduler.model.Room
 import scheduler.model.meeting.Meeting
 import scheduler.model.meeting.TimedMeetingRequest
