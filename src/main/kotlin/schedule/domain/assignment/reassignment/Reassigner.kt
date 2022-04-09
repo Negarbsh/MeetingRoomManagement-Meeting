@@ -13,10 +13,11 @@ interface Reassigner {
     returns an array of the changed meetings and the room id (it doesn't work with db).
     else, returns null
     */
-    fun reorganizeByMeeting(
-        meetings: List<Meeting>,
+    fun reassignByMeeting(
+        meetingsToConsider: ArrayList<Meeting>,
         rooms: List<Room>,
-        timedMeetingRequest: TimedMeetingRequest
-    ): Pair<List<Meeting>?, ObjectId?>
+        timedMeetingRequest: TimedMeetingRequest,
+        algorithmLevel : Int
+    ): Pair<ArrayList<Meeting>, ObjectId>?
     // new meetings, roomId
 }

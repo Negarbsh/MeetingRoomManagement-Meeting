@@ -23,8 +23,8 @@ class MeetingServiceImpl(
     override fun schedule(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
         val roomId = meetingAssigner.scheduleFixedTimeMeeting(timedMeetingRequest)
         if (roomId != null) return roomId
-        val (changedMeetings, newRoomId) = createByReorganization(timedMeetingRequest)
-        if (newRoomId == null) return null
+        val reassignResult = handlerReassignment(timedMeetingRequest) ?: return null
+        val (changedMeetings, newRoomId) = reassignResult
         val meetingId = meetingAssigner.finalizeMeetingCreation(timedMeetingRequest, newRoomId)
         resetDB(changedMeetings)
         return meetingId
@@ -37,15 +37,21 @@ class MeetingServiceImpl(
     }
 
 
-    private fun createByReorganization(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>?, ObjectId?> {
-        val meetings = meetingCRUD.findAll() //todo no! (it should be passed from the outer layer)
+    private fun handlerReassignment(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>, ObjectId>? {
         val rooms: List<Room> = roomDAO.getAllRooms()
-        val (changedMeetings, newRoomId) = reassigner.reorganizeByMeeting(
+        val reassignAlgorithmLevels = 5
+        val meetings = getMeetingsForReassign(reassignAlgorithmLevels)
+        return reassigner.reassignByMeeting(
             meetings,
             rooms,
             timedMeetingRequest,
+            1,
         )
-        return Pair(changedMeetings, newRoomId)
+    }
+
+    private fun getMeetingsForReassign(reassignAlgorithmLevels: Int): ArrayList<Meeting> {
+        val meetings = meetingCRUD.findAll() //todo not!
+        return ArrayList(meetings)
     }
 
     override fun getEarliestMeetingChance(

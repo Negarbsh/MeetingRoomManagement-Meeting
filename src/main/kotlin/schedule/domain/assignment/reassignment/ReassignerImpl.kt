@@ -11,53 +11,66 @@ import schedule.model.meeting.TimeInterval
 @Component
 class ReassignerImpl : Reassigner {
 
-    override fun reorganizeByMeeting(
-        meetings: List<Meeting>,
+    override fun reassignByMeeting(
+        meetingsToConsider: ArrayList<Meeting>,
         rooms: List<Room>,
-        timedMeetingRequest: TimedMeetingRequest
-    ): Pair<List<Meeting>?, ObjectId?> {
+        timedMeetingRequest: TimedMeetingRequest,
+        algorithmLevel: Int
+    ): Pair<ArrayList<Meeting>, ObjectId>? {
         // new meetings , room id
         val maxCapacity = timedMeetingRequest.purpose.getMaxCapacity()
-        val roomsPossibleByAttributes = searchRoomsByAttribute(rooms, timedMeetingRequest, maxCapacity)
+        val roomsPossibleByAttributes = searchRoomsByAttribute(rooms, timedMeetingRequest)
         val emptyRooms = getEmptyRooms(
-            rooms, meetings, timedMeetingRequest.timeInterval
+            rooms, meetingsToConsider, timedMeetingRequest.timeInterval
         )
-        return checkReassignment(emptyRooms, roomsPossibleByAttributes, meetings, timedMeetingRequest, maxCapacity)
+        return checkReassignment(algorithmLevel, rooms, meetingsToConsider,timedMeetingRequest)
+
     }
 
-    private fun checkReassignment(
-        emptyRooms: List<Room>,
-        roomsPossibleByAttributes: List<Room>,
-        meetings: List<Meeting>,
-        timedMeetingRequest: TimedMeetingRequest,
-        maxCapacity: Int
-    ): Pair<List<Meeting>?, ObjectId?> {
-        if (emptyRooms.isEmpty()) return Pair(null, null)
-        for (candidateRoom in roomsPossibleByAttributes) {
-            val meetingsToChange = getInterferingMeetings(
-                candidateRoom, meetings, timedMeetingRequest.timeInterval
-            )
-            /*If the room was free at the time we want, no other meeting needs to change, and we're good to go!
-            (in the simple algorithm for reorganization, this case never happens, but it may happen when we have the recursive implementation) */
-            if (meetingsToChange.isEmpty()) return Pair(null, candidateRoom.id)
-            /* for simplicity, we ignore the conditions where there are more than one meeting to change*/
-            if (meetingsToChange.size > 1) continue
-            val oldMeeting = meetingsToChange[0]
-            val meetingToChange = Meeting(oldMeeting)
-            val newMeetingRequest = TimedMeetingRequest(meetingToChange)
-            for (emptyRoom in emptyRooms) {
-                if (!doesRoomFitToMeeting(emptyRoom, newMeetingRequest, maxCapacity)) continue
-                //now we know the interfering meeting can be held in the empty room
-                meetingToChange.roomId = emptyRoom.id
-                return Pair(listOf(meetingToChange), candidateRoom.id)
+    fun checkReassignment(
+        algorithmLevel: Int,
+        allRooms: List<Room>,
+        meetings: ArrayList<Meeting>,
+        newMeetingRequest: TimedMeetingRequest
+    ): Pair<ArrayList<Meeting>, ObjectId>? {
+        if (algorithmLevel <= 0) return null
+        val roomsPossibleByAttributes = searchRoomsByAttribute(allRooms, newMeetingRequest)
+        outer@ for (candidateRoom in roomsPossibleByAttributes) {
+            val meetingsToChange = getInterferingMeetings(candidateRoom, meetings, newMeetingRequest.timeInterval)
+            if (meetingsToChange.isEmpty()) return Pair(
+                meetings,
+                candidateRoom.id
+            ) // if there was no interfering meeting, we are good to go
+            var imaginaryMeetingList = arrayListOf<Meeting>()
+            imaginaryMeetingList.addAll(meetings)
+            imaginaryMeetingList.add(
+                Meeting(
+                    newMeetingRequest,
+                    candidateRoom.id
+                )
+            ) // imagine the candidate room is assigned to our new meeting
+
+            for (oldMeeting in meetingsToChange) {
+                imaginaryMeetingList.remove(oldMeeting) // imagine we didn't have the old meeting (we want to insert it again)
+                val meetingToChange = Meeting(oldMeeting)
+                val meetingToChangeRequest = TimedMeetingRequest(meetingToChange)
+                val reassignedMeetings =
+                    checkReassignment(
+                        algorithmLevel - 1,
+                        allRooms,
+                        imaginaryMeetingList,
+                        meetingToChangeRequest
+                    ) ?: continue@outer //if we couldn't assign the old meeting, the candidate room isn't fine
+                imaginaryMeetingList = reassignedMeetings.first
             }
+            return Pair(imaginaryMeetingList, candidateRoom.id)
         }
-        return Pair(null, null)
+        return null //means the reassignment has failed
     }
 
     private fun getInterferingMeetings(
         roomToCheck: Room,
-        allMeetings: List<Meeting>,
+        consideringMeetings: List<Meeting>,
         interval: TimeInterval
     ): List<Meeting> {
         TODO("Not yet implemented")
@@ -75,9 +88,9 @@ class ReassignerImpl : Reassigner {
     private fun searchRoomsByAttribute(
         rooms: List<Room>,
         meetingRequest: TimedMeetingRequest,
-        maxSize: Int
     ): List<Room> {
         val possibleRooms = arrayListOf<Room>()
+        val maxSize = meetingRequest.purpose.getMaxCapacity()
         for (room in rooms) {
             if (doesRoomFitToMeeting(room, meetingRequest, maxSize))
                 possibleRooms.add(room)
