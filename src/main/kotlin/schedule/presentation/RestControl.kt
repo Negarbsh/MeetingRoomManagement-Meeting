@@ -8,18 +8,38 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import schedule.domain.MeetingService
+
+import schedule.domain.MeetingServiceImpl
 import schedule.model.MeetingSearchRequest
-import schedule.model.meeting.MeetingEditRequest
-import schedule.model.meeting.MeetingRequest
-import schedule.model.meeting.TimedMeetingRequest
+import schedule.model.enums.MeetingPurpose
+import schedule.model.enums.Office
+import schedule.model.meeting.*
+import java.sql.Timestamp
 import java.util.stream.Collectors
 
 @RestController
 class RestControl(
     @Autowired val tokenInterceptor: HandlerInterceptor,
-    @Autowired val meetingService: MeetingService
+    @Autowired val meetingService: MeetingServiceImpl,
 ) : WebMvcConfigurer {
+
+    @PostMapping("/test")
+    fun someting() {
+        val meeting = Meeting(
+            title = "a",
+            description = "b",
+            participants = listOf(Participant("my mail!")),
+            meetingOrganizer = MeetingOrganizer(),
+            purpose = MeetingPurpose.GROOMING,
+            timeInterval = TimeInterval(Timestamp(20000000), Timestamp(300000000)),
+            features = null,
+            roomId = ObjectId(100, 100),
+            office = Office.TEHRAN
+        )
+        meetingService.meetingCRUD.save(meeting)
+        println(meetingService.meetingCRUD.findAllByOffice(Timestamp(20000000), Office.TEHRAN))
+    }
+
 
     @PostMapping("/schedule")
     fun createMeeting(@RequestBody timedMeetingRequest: TimedMeetingRequest): ResponseEntity<String> {

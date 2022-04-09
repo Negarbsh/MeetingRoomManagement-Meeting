@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class TokenInterceptor : HandlerInterceptor {
-    val tokenHandler : TokenHandler = TokenHandlerImpl()
+    val tokenHandler: TokenHandler = TokenHandlerImpl()
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         return try {
@@ -18,5 +18,6 @@ class TokenInterceptor : HandlerInterceptor {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), e.message)
             false
         }
+//        return true
     }
 }

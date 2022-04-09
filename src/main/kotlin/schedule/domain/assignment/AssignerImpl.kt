@@ -20,11 +20,6 @@ class AssignerImpl(private val meetingDAO: MeetingCRUD) : Assigner {
         if (roomId != null)
             return finalizeMeetingCreation(timedMeetingRequest, roomId)
         return null
-//        val (changedMeetings, newRoomId) = createByReorganization(timedMeetingRequest)
-//        if (newRoomId == null) return null
-//        val meetingId = insertMeetingInDb(timedMeetingRequest, newRoomId)
-//        resetDB(changedMeetings)
-//        return meetingId
     }
 
     override fun finalizeMeetingCreation(
@@ -78,7 +73,7 @@ class AssignerImpl(private val meetingDAO: MeetingCRUD) : Assigner {
     }
 
     private fun getMeetingsInInterval(interval: TimeInterval, meetingDAO: MeetingCRUD): Set<Meeting> {
-        return meetingDAO.findInterferingWithInterval(interval)
+        return meetingDAO.findAllInsideTimeInterval(interval.start, interval.end)
     }
 
 }

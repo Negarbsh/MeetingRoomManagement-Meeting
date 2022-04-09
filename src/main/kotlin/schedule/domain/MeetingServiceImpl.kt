@@ -15,7 +15,7 @@ import java.sql.Timestamp
 @Component
 class MeetingServiceImpl(
     @Autowired private val meetingAssigner: Assigner,
-    @Autowired private val meetingCRUD: MeetingCRUD,
+    @Autowired val meetingCRUD: MeetingCRUD,
     @Autowired val reassigner: Reassigner,
     @Autowired val roomDAO: RoomReader
 ) : MeetingService {
@@ -30,12 +30,10 @@ class MeetingServiceImpl(
         return meetingId
     }
 
-
     private fun resetDB(overwritingMeetings: List<Meeting>?) {
         if (overwritingMeetings == null) return
         meetingCRUD.saveAll(overwritingMeetings)
     }
-
 
     private fun handlerReassignment(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>, ObjectId>? {
         val rooms: List<Room> = roomDAO.getAllRooms()
@@ -54,8 +52,7 @@ class MeetingServiceImpl(
         reassignAlgorithmLevels: Int
     ): Set<Meeting> {
         if (reassignAlgorithmLevels <= 0) return setOf()
-//        val meetings = meetingCRUD.findAllByOffice(timedMeetingRequest.office)
-        val meetings = meetingCRUD.findAll()
+        val meetings = meetingCRUD.findAllByOffice(office = timedMeetingRequest.office)
         val neededMeetings = mutableSetOf<Meeting>()
         for (interferingMeeting in getInterferingMeetings(meetings, timedMeetingRequest.timeInterval)) {
             neededMeetings.addAll(
@@ -102,7 +99,10 @@ class MeetingServiceImpl(
     }
 
     override fun searchMeeting(meetingSearchRequest: MeetingSearchRequest): Set<Meeting> {
-        var searchResult = meetingCRUD.findInterferingWithInterval(meetingSearchRequest.timeInterval)
+        var searchResult = meetingCRUD.findAllInsideTimeInterval(
+            meetingSearchRequest.timeInterval.start,
+            meetingSearchRequest.timeInterval.end
+        )
         if (meetingSearchRequest.roomId != null) {
             val searchByRoomResult = meetingCRUD.findAllByRoomId(meetingSearchRequest.roomId)
             searchResult = searchResult.intersect(searchByRoomResult.toSet())
@@ -111,6 +111,6 @@ class MeetingServiceImpl(
     }
 
     override fun getMeetingsInInterval(interval: TimeInterval): Set<Meeting> {
-        return meetingCRUD.findInterferingWithInterval(interval)
+        return meetingCRUD.findAllInsideTimeInterval(interval.start, interval.end)
     }
 }
