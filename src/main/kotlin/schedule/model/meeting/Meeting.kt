@@ -5,6 +5,7 @@ import schedule.model.enums.MeetingPurpose
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import schedule.model.enums.Office
 
 
 @Document(collection = "meetings")
@@ -18,7 +19,8 @@ class Meeting(
     val purpose: MeetingPurpose,
     val timeInterval: TimeInterval,
     val features: List<Feature>?,
-    var roomId: ObjectId
+    var roomId: ObjectId,
+    val office: Office
 ) {
     constructor(meetingRequest: TimedMeetingRequest, roomId: ObjectId) : this(
         title = meetingRequest.title,
@@ -28,7 +30,8 @@ class Meeting(
         purpose = meetingRequest.purpose,
         timeInterval = meetingRequest.timeInterval,
         features = meetingRequest.features,
-        roomId = roomId
+        roomId = roomId,
+        office = meetingRequest.office
     )
 
     constructor(meeting: Meeting) : this(
@@ -40,11 +43,9 @@ class Meeting(
         purpose = meeting.purpose,
         timeInterval = meeting.timeInterval,
         features = meeting.features,
-        roomId = meeting.roomId
+        roomId = meeting.roomId,
+        office = meeting.office
     )
-
-    val duration: Int = timeInterval.duration
-    val population = participants.size
 
     override fun toString(): String {
         return "id: $meetingId\n" +

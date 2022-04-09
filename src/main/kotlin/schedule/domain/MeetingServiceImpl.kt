@@ -40,18 +40,43 @@ class MeetingServiceImpl(
     private fun handlerReassignment(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>, ObjectId>? {
         val rooms: List<Room> = roomDAO.getAllRooms()
         val reassignAlgorithmLevels = 5
-        val meetings = getMeetingsForReassign(reassignAlgorithmLevels)
+        val meetings = ArrayList(getMeetingsForReassign(timedMeetingRequest, reassignAlgorithmLevels))
         return reassigner.reassignByMeeting(
             meetings,
             rooms,
             timedMeetingRequest,
-            1,
+            reassignAlgorithmLevels,
         )
     }
 
-    private fun getMeetingsForReassign(reassignAlgorithmLevels: Int): ArrayList<Meeting> {
-        val meetings = meetingCRUD.findAll() //todo not!
-        return ArrayList(meetings)
+    private fun getMeetingsForReassign(
+        timedMeetingRequest: TimedMeetingRequest,
+        reassignAlgorithmLevels: Int
+    ): Set<Meeting> {
+        if (reassignAlgorithmLevels <= 0) return setOf()
+//        val meetings = meetingCRUD.findAllByOffice(timedMeetingRequest.office)
+        val meetings = meetingCRUD.findAll()
+        val neededMeetings = mutableSetOf<Meeting>()
+        for (interferingMeeting in getInterferingMeetings(meetings, timedMeetingRequest.timeInterval)) {
+            neededMeetings.addAll(
+                getMeetingsForReassign(
+                    TimedMeetingRequest(interferingMeeting),
+                    reassignAlgorithmLevels - 1
+                )
+            )
+        }
+        return neededMeetings
+    }
+
+    private fun getInterferingMeetings(
+        consideringMeetings: List<Meeting>,
+        interval: TimeInterval
+    ): List<Meeting> {
+        val searchResult = arrayListOf<Meeting>()
+        for (meeting in consideringMeetings) {
+            if (meeting.timeInterval.isInterfering(interval)) searchResult.add(meeting)
+        }
+        return searchResult
     }
 
     override fun getEarliestMeetingChance(

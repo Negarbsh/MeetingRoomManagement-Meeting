@@ -18,13 +18,7 @@ class ReassignerImpl : Reassigner {
         algorithmLevel: Int
     ): Pair<ArrayList<Meeting>, ObjectId>? {
         // new meetings , room id
-        val maxCapacity = timedMeetingRequest.purpose.getMaxCapacity()
-        val roomsPossibleByAttributes = searchRoomsByAttribute(rooms, timedMeetingRequest)
-        val emptyRooms = getEmptyRooms(
-            rooms, meetingsToConsider, timedMeetingRequest.timeInterval
-        )
-        return checkReassignment(algorithmLevel, rooms, meetingsToConsider,timedMeetingRequest)
-
+        return checkReassignment(algorithmLevel, rooms, meetingsToConsider, timedMeetingRequest)
     }
 
     fun checkReassignment(
@@ -35,7 +29,7 @@ class ReassignerImpl : Reassigner {
     ): Pair<ArrayList<Meeting>, ObjectId>? {
         if (algorithmLevel <= 0) return null
         val roomsPossibleByAttributes = searchRoomsByAttribute(allRooms, newMeetingRequest)
-        outer@ for (candidateRoom in roomsPossibleByAttributes) {
+        candidateRoomLoop@ for (candidateRoom in roomsPossibleByAttributes) {
             val meetingsToChange = getInterferingMeetings(candidateRoom, meetings, newMeetingRequest.timeInterval)
             if (meetingsToChange.isEmpty()) return Pair(
                 meetings,
@@ -43,6 +37,7 @@ class ReassignerImpl : Reassigner {
             ) // if there was no interfering meeting, we are good to go
             var imaginaryMeetingList = arrayListOf<Meeting>()
             imaginaryMeetingList.addAll(meetings)
+//            var imaginaryMeetingList = ArrayList(meetings)
             imaginaryMeetingList.add(
                 Meeting(
                     newMeetingRequest,
@@ -60,7 +55,8 @@ class ReassignerImpl : Reassigner {
                         allRooms,
                         imaginaryMeetingList,
                         meetingToChangeRequest
-                    ) ?: continue@outer //if we couldn't assign the old meeting, the candidate room isn't fine
+                    )
+                        ?: continue@candidateRoomLoop //if we couldn't assign the old meeting, the candidate room isn't fine
                 imaginaryMeetingList = reassignedMeetings.first
             }
             return Pair(imaginaryMeetingList, candidateRoom.id)
@@ -73,15 +69,13 @@ class ReassignerImpl : Reassigner {
         consideringMeetings: List<Meeting>,
         interval: TimeInterval
     ): List<Meeting> {
-        TODO("Not yet implemented")
-    }
-
-    private fun getEmptyRooms(
-        rooms: List<Room>,
-        meetings: List<Meeting>,
-        interval: TimeInterval
-    ): List<Room> {
-        TODO("Not yet implemented")
+        val searchResult = arrayListOf<Meeting>()
+        for (meeting in consideringMeetings) {
+            if (meeting.roomId == roomToCheck.id && meeting.timeInterval.isInterfering(interval)) searchResult.add(
+                meeting
+            )
+        }
+        return searchResult
     }
 
     //todo should this function be here?
