@@ -36,9 +36,9 @@ class MeetingServiceImpl(
     }
 
     private fun handlerReassignment(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>, ObjectId>? {
-        val rooms: List<Room> = roomDAO.getAllRooms()
+        val rooms: List<Room> = roomDAO.findAllRooms()
         val reassignAlgorithmLevels = 5
-        val meetings = ArrayList(getMeetingsForReassign(timedMeetingRequest, reassignAlgorithmLevels))
+        val meetings = ArrayList(getRequiredMeetingsForReassign(timedMeetingRequest, reassignAlgorithmLevels))
         return reassigner.reassignByMeeting(
             meetings,
             rooms,
@@ -47,7 +47,7 @@ class MeetingServiceImpl(
         )
     }
 
-    private fun getMeetingsForReassign(
+    private fun getRequiredMeetingsForReassign(
         timedMeetingRequest: TimedMeetingRequest,
         reassignAlgorithmLevels: Int
     ): Set<Meeting> {
@@ -56,7 +56,7 @@ class MeetingServiceImpl(
         val neededMeetings = mutableSetOf<Meeting>()
         for (interferingMeeting in getInterferingMeetings(meetings, timedMeetingRequest.timeInterval)) {
             neededMeetings.addAll(
-                getMeetingsForReassign(
+                getRequiredMeetingsForReassign(
                     TimedMeetingRequest(interferingMeeting),
                     reassignAlgorithmLevels - 1
                 )

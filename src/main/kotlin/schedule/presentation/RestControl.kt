@@ -46,7 +46,7 @@ class RestControl(
         val meetingId = meetingService.schedule(timedMeetingRequest)
             ?: return ResponseEntity(
                 "Meeting creation failed. Try choosing another time",
-                HttpStatus.NOT_ACCEPTABLE               //TODO is the status correct?
+                HttpStatus.NOT_ACCEPTABLE
             )
         return ResponseEntity("$meetingId", HttpStatus.CREATED)
     }

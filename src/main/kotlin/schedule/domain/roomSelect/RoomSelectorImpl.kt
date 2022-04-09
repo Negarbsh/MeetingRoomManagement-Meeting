@@ -39,7 +39,7 @@ class RoomSelectorImpl(val meetingDAO: MeetingCRUD) : RoomSelector {
     }
 
     private fun getRoomsById(roomIds: List<ObjectId>): List<Room> {
-        TODO("Not yet implemented")
+        return roomDAO.findAllByIds(roomIds)
     }
 
     private fun getMeetingRooms(meetings: Collection<Meeting>): List<ObjectId> {
@@ -51,6 +51,6 @@ class RoomSelectorImpl(val meetingDAO: MeetingCRUD) : RoomSelector {
     }
 
     private fun getMeetingsInInterval(timeInterval: TimeInterval,  meetingDAO: MeetingCRUD): List<Meeting> {
-        return meetingDAO.findAll() //todo query
+        return ArrayList(meetingDAO.findAllInsideTimeInterval(timeInterval.start, timeInterval.end))
     }
 }
