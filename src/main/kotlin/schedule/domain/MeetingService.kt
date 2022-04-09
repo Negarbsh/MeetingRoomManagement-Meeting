@@ -22,8 +22,8 @@ interface MeetingService {
     fun cancel(meetingId: ObjectId): Boolean
 
     /* gets the search request and returns the matching meetings */
-    fun searchMeeting(meetingSearchRequest: MeetingSearchRequest): List<Meeting>
+    fun searchMeeting(meetingSearchRequest: MeetingSearchRequest): Set<Meeting>
 
     /* returns all meetings in an interval */
-    fun getMeetingsInInterval(interval: TimeInterval): List<Meeting>
+    fun getMeetingsInInterval(interval: TimeInterval): Set<Meeting>
 }

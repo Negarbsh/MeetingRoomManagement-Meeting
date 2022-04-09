@@ -8,7 +8,7 @@ import java.sql.Timestamp
 interface Assigner {
 
     /* if successful, returns the meeting id*/
-    fun createFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId?
+    fun scheduleFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId?
 
     /*Checks if we can hold the meeting after the "timeLowerBound", then returns the roomId and the start time if it was possible*/
     fun getEarliestMeetingChance(
@@ -18,4 +18,5 @@ interface Assigner {
         maxMinuteIncrement : Int
     ): Pair<ObjectId, Timestamp>?
 
+    fun finalizeMeetingCreation(timedMeetingRequest: TimedMeetingRequest, roomId: ObjectId): ObjectId?
 }

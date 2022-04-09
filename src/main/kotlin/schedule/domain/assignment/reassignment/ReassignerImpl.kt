@@ -5,10 +5,10 @@ import schedule.model.Room
 import schedule.model.enums.Feature
 import schedule.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import schedule.model.meeting.TimeInterval
 
-@Service
+@Component
 class ReassignerImpl : Reassigner {
 
     override fun reorganizeByMeeting(
@@ -35,13 +35,12 @@ class ReassignerImpl : Reassigner {
         if (emptyRooms.isEmpty()) return Pair(null, null)
         for (candidateRoom in roomsPossibleByAttributes) {
             val meetingsToChange = getInterferingMeetings(
-                candidateRoom.id, candidateRoom, meetings, timedMeetingRequest.timeInterval
+                candidateRoom, meetings, timedMeetingRequest.timeInterval
             )
             /*If the room was free at the time we want, no other meeting needs to change, and we're good to go!
             (in the simple algorithm for reorganization, this case never happens, but it may happen when we have the recursive implementation) */
             if (meetingsToChange.isEmpty()) return Pair(null, candidateRoom.id)
-            /* for simplicity, we ignore the conditions where there are more than one meeting to change
-            * */
+            /* for simplicity, we ignore the conditions where there are more than one meeting to change*/
             if (meetingsToChange.size > 1) continue
             val oldMeeting = meetingsToChange[0]
             val meetingToChange = Meeting(oldMeeting)
@@ -57,7 +56,6 @@ class ReassignerImpl : Reassigner {
     }
 
     private fun getInterferingMeetings(
-        roomId: ObjectId,
         roomToCheck: Room,
         allMeetings: List<Meeting>,
         interval: TimeInterval
