@@ -17,7 +17,7 @@ import java.util.stream.Collectors
 
 @RestController
 class RestControl(
-    @Autowired val tokenInterceptor : HandlerInterceptor,
+    @Autowired val tokenInterceptor: HandlerInterceptor,
     @Autowired val meetingService: MeetingService
 ) : WebMvcConfigurer {
 
@@ -46,7 +46,7 @@ class RestControl(
         val isCanceled = meetingService.cancel(meetingId)
         if (isCanceled)
             return ResponseEntity(HttpStatus.OK)
-        return ResponseEntity(HttpStatus.CONFLICT)
+        return ResponseEntity("The meeting Id is invalid", HttpStatus.NOT_ACCEPTABLE)
     }
 
     @PutMapping("/edit")
@@ -54,9 +54,9 @@ class RestControl(
         @RequestBody editRequest: MeetingEditRequest,
         @RequestHeader("user-mail") userMail: String
     ): ResponseEntity<String> {
-        val isEdited = meetingService.edit(editRequest, userMail)
-        if (isEdited)
-            return ResponseEntity(HttpStatus.OK)
+        val roomId = meetingService.edit(editRequest, userMail)
+        if (roomId != null)
+            return ResponseEntity("room id: $roomId", HttpStatus.OK)
         return ResponseEntity(HttpStatus.CONFLICT)
     }
 

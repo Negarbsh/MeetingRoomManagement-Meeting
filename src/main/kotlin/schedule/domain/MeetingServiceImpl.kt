@@ -26,12 +26,19 @@ class MeetingServiceImpl(
         return meetingAssigner.getEarliestMeetingChance(timeLowerBound, meetingRequest, 15, 1000)
     }
 
-    override fun edit(editRequest: MeetingEditRequest, editorMail: String): Boolean {
-        TODO("Not yet implemented")
+    override fun edit(editRequest: MeetingEditRequest, editorMail: String): ObjectId? {
+        val isCanceled = cancel(editRequest.meetingId)
+        if(!isCanceled) return null
+        return schedule(editRequest.newMeetingRequest)
     }
 
     override fun cancel(meetingId: ObjectId): Boolean {
-        TODO("Not yet implemented")
+        return try {
+            meetingCRUD.deleteById(meetingId)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override fun searchMeeting(meetingSearchRequest: MeetingSearchRequest): List<Meeting> {

@@ -1,5 +1,7 @@
 package schedule.model.meeting
 
-class MeetingEditRequest {
+import org.bson.types.ObjectId
+
+class MeetingEditRequest(val meetingId: ObjectId, val newMeetingRequest: TimedMeetingRequest) {
     //TODO
 }

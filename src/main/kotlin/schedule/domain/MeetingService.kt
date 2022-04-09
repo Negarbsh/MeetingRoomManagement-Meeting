@@ -15,8 +15,8 @@ interface MeetingService {
         meetingRequest: MeetingRequest
     ): Pair<ObjectId, Timestamp>?
 
-    /* gets the editRequest and returns if the edit process was successful */
-    fun edit(editRequest: MeetingEditRequest, editorMail: String): Boolean
+    /* gets the editRequest and returns the new room id if the edit process was successful. If it wasn't, returns null */
+    fun edit(editRequest: MeetingEditRequest, editorMail: String): ObjectId?
 
     /* cancels the meeting with specified meetingId and returns true if it was successful */
     fun cancel(meetingId: ObjectId): Boolean
