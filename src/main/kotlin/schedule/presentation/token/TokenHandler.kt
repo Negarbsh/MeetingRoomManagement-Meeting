@@ -5,5 +5,7 @@ import javax.servlet.http.HttpServletResponse
 
 
 interface TokenHandler {
-    fun checkJWTToken(request: HttpServletRequest, res: HttpServletResponse): Boolean
+
+    /* If the token was valid, returns the payload. Else, throws Exception */
+    fun checkJWTToken(request: HttpServletRequest, res: HttpServletResponse): String
 }

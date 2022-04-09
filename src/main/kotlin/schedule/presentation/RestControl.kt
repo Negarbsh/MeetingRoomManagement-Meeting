@@ -24,7 +24,7 @@ class RestControl(
 ) : WebMvcConfigurer {
 
     @PostMapping("/test")
-    fun someting() {
+    fun something() {
         val meeting = Meeting(
             title = "a",
             description = "b",
@@ -39,7 +39,6 @@ class RestControl(
         meetingService.meetingCRUD.save(meeting)
         println(meetingService.meetingCRUD.findAllByOffice(Timestamp(20000000), Office.TEHRAN))
     }
-
 
     @PostMapping("/schedule")
     fun createMeeting(@RequestBody timedMeetingRequest: TimedMeetingRequest): ResponseEntity<String> {
