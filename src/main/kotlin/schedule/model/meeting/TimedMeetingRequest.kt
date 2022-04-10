@@ -15,7 +15,7 @@ class TimedMeetingRequest(
     office: Office
 ) : MeetingRequest(
     title, description, participants, meetingOrganizer, purpose,
-    timeInterval.getDuration(), features, office
+    timeInterval.duration.toLong(), features, office
 ) {
     constructor(
         meetingRequest: MeetingRequest,

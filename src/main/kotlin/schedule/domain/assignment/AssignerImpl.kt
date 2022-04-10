@@ -4,6 +4,7 @@ import schedule.dao.MeetingCRUD
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import notifService.Notifier
+import notifService.NotifierImpl
 import schedule.domain.roomSelect.RoomSelectorImpl
 import schedule.domain.roomSelect.RoomSelector
 import schedule.model.meeting.*
@@ -13,7 +14,7 @@ import java.time.Instant
 @Service
 class AssignerImpl(private val meetingDAO: MeetingCRUD) : Assigner {
     private val roomSearcher: RoomSelector = RoomSelectorImpl(meetingDAO)
-    private val notifier: Notifier = Notifier()
+    private val notifier: Notifier = NotifierImpl()
 
     override fun scheduleFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
         val roomId: ObjectId? = roomSearcher.getBestRoomChoice(timedMeetingRequest)

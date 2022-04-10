@@ -2,9 +2,7 @@ package notifService
 
 import schedule.model.meeting.MeetingRequest
 
-class Notifier {
+interface Notifier {
 
-    fun sendMail(meetingRequest: MeetingRequest){
-       println("Sent email to meeting participants!")
-    }
+    fun sendMail(meetingRequest: MeetingRequest)
 }
