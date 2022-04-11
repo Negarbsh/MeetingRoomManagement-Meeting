@@ -4,7 +4,7 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import schedule.dao.MeetingCRUD
-import schedule.dao.roomGrpc.RoomReader
+import schedule.dao.roomGrpc.RoomRepo
 import schedule.domain.assignment.Assigner
 import schedule.domain.assignment.reassignment.Reassigner
 import schedule.model.MeetingSearchRequest
@@ -17,7 +17,7 @@ class MeetingServiceImpl(
     @Autowired private val meetingAssigner: Assigner,
     @Autowired val meetingCRUD: MeetingCRUD,
     @Autowired val reassigner: Reassigner,
-    @Autowired val roomDAO: RoomReader
+    @Autowired val roomDAO: RoomRepo
 ) : MeetingService {
 
     override fun schedule(timedMeetingRequest: TimedMeetingRequest): ObjectId? {

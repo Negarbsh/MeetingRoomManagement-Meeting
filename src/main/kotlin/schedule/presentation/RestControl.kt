@@ -36,7 +36,7 @@ class RestControl(
             roomId = ObjectId(100, 100),
             office = Office.TEHRAN
         )
-        meetingService.meetingCRUD.save(meeting)
+//        meetingService.meetingCRUD.save(meeting)
         println(meetingService.meetingCRUD.findAllByOffice(Timestamp(20000000), Office.TEHRAN))
     }
 

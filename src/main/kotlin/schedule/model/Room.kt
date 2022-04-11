@@ -16,4 +16,12 @@ class Room(val id: ObjectId, val name: String, val office: Office, val features:
         }
         return true
     }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Room && this.id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }

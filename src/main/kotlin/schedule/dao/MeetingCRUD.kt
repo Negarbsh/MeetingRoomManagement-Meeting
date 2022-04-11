@@ -12,7 +12,7 @@ import java.util.Date
 @Repository
 interface MeetingCRUD : MongoRepository<Meeting, ObjectId> {
 
-    @Query(value = "{'timeInterval.start' : {\$gte:v?0}, 'timeInterval.end' : {\$lte: ?1}, ")
+    @Query(value = "{'timeInterval.start' : {\$gte:v?0}, 'timeInterval.end' : {\$lte: ?1}")
     fun findAllInsideTimeInterval(startTime: Timestamp, endTime: Timestamp): Set<Meeting>
 
     fun findAllByRoomId(roomId: ObjectId): List<Meeting>

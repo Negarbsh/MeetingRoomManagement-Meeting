@@ -7,7 +7,7 @@ import schedule.model.enums.Feature
 import org.springframework.stereotype.Component
 
 @Component
-class RoomRepository : RoomReader {
+class RoomRepoImpl : RoomRepo {
     private final val channel = ManagedChannelBuilder.forAddress("localhost", 8980).usePlaintext().build()
     val grpcRoomClient = GrpcRoomClient(channel)
 
@@ -34,6 +34,16 @@ class RoomRepository : RoomReader {
             if (room.id in roomIds) searchResult.add(room)
         }
         return searchResult
+    }
+
+    //todo move it to the room system
+    override fun findById(roomId: ObjectId?): Room? {
+        if(roomId == null) return null
+        val rooms: List<Room> = findAllRooms()
+        for (room in rooms) {
+            if(room.id == roomId) return room
+        }
+        return null
     }
 
 

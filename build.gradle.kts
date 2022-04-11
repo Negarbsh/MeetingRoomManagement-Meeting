@@ -31,7 +31,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.code.gson:gson:2.9.0")
+
+    implementation("junit:junit:4.13.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-core:3.12.4")
+    testImplementation("com.appmattus.fixture:fixture:1.2.0")
 
     implementation("io.grpc:grpc-kotlin-stub:1.2.1")
     implementation("io.jsonwebtoken:jjwt:0.9.1")

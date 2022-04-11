@@ -4,7 +4,7 @@ import org.bson.types.ObjectId
 import schedule.model.Room
 import schedule.model.enums.Feature
 
-interface RoomReader {
+interface RoomRepo {
     fun findAllRooms(): List<Room>
     fun searchRooms(
         features: List<Feature>? = null,
@@ -13,5 +13,7 @@ interface RoomReader {
     ): List<Room>
 
     fun findAllByIds(roomIds: List<ObjectId>): List<Room>
+
+    fun findById(roomId: ObjectId?): Room?
 
 }

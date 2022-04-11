@@ -1,20 +1,21 @@
 package schedule.domain.roomSelect
 
 import schedule.dao.MeetingCRUD
-import schedule.dao.roomGrpc.RoomReader
-import schedule.dao.roomGrpc.RoomRepository
+import schedule.dao.roomGrpc.RoomRepo
 import schedule.model.Room
 import schedule.model.meeting.Meeting
 import schedule.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import schedule.model.meeting.TimeInterval
 
 @Service
-class RoomSelectorImpl(val meetingDAO: MeetingCRUD) : RoomSelector {
-    private val roomDAO: RoomReader = RoomRepository()
+class RoomSelectorImpl(
+    @Autowired val meetingDAO: MeetingCRUD, @Autowired val roomDAO: RoomRepo
+) : RoomSelector {
 
-     override fun getBestRoomChoice(meetingRequest: TimedMeetingRequest): ObjectId? {
+    override fun getBestRoomChoice(meetingRequest: TimedMeetingRequest): ObjectId? {
         val possibleRooms = getAllPossibleRooms(meetingRequest)
         var bestRoomId: ObjectId? = null
         var minCapacity = -1
@@ -34,8 +35,9 @@ class RoomSelectorImpl(val meetingDAO: MeetingCRUD) : RoomSelector {
         val roomsPossibleByAttributes =
             roomDAO.searchRooms(meetingRequest.features, minCapacity = meetingRequest.population, maxCapacity)
         val interferingMeetings = getMeetingsInInterval(meetingRequest.timeInterval, meetingDAO)
-        val busyRooms = getMeetingRooms(interferingMeetings)
-        return roomsPossibleByAttributes.minus(getRoomsById(busyRooms).toSet())
+        val busyRoomsId = getMeetingRooms(interferingMeetings)
+        val busyRooms = getRoomsById(busyRoomsId).toSet()
+        return roomsPossibleByAttributes.minus(busyRooms)
     }
 
     private fun getRoomsById(roomIds: List<ObjectId>): List<Room> {
@@ -50,7 +52,7 @@ class RoomSelectorImpl(val meetingDAO: MeetingCRUD) : RoomSelector {
         return roomIds
     }
 
-    private fun getMeetingsInInterval(timeInterval: TimeInterval,  meetingDAO: MeetingCRUD): List<Meeting> {
+    private fun getMeetingsInInterval(timeInterval: TimeInterval, meetingDAO: MeetingCRUD): List<Meeting> {
         return ArrayList(meetingDAO.findAllInsideTimeInterval(timeInterval.start, timeInterval.end))
     }
 }
