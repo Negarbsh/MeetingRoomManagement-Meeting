@@ -53,7 +53,7 @@ class RoomSelectorTest {
     }
 
     @Test
-    fun `get all possible rooms for a request with no interfering meeting`() {
+    fun `getAllPossibleRooms for a request with no interfering meeting`() {
         val fixture = kotlinFixture {
             repeatCount { 7 } //to make sure the number of request participants is 7
             factory<Feature> { Feature.WHITE_BOARD }
@@ -84,7 +84,7 @@ class RoomSelectorTest {
     }
 
     @Test
-    fun `get all possible rooms for a request when with interfering meeting`() {
+    fun `getAllPossibleRooms for a request when with interfering meeting`() {
         val fixture = kotlinFixture {
             repeatCount { 7 } //to make sure the number of request participants is 7
             factory<Feature> { Feature.WHITE_BOARD }
@@ -92,23 +92,8 @@ class RoomSelectorTest {
             factory<Office> { Office.TEHRAN }
         }
         val request = fixture<TimedMeetingRequest>()
-        Mockito.`when`(roomRepo.searchRooms(request.features, request.population, -1)).thenReturn(
-            listOf(
-                Room(
-                    ObjectId(),
-                    "tehran",
-                    Office.TEHRAN,
-                    listOf(Feature.PROJECTOR, Feature.WHITE_BOARD, Feature.SOUND_PROOF),
-                    20
-                ), Room(
-                    ObjectId("000000642d276104ab000064"),
-                    "mashhad",
-                    Office.TEHRAN,
-                    listOf(Feature.WHITE_BOARD, Feature.PROJECTOR),
-                    8
-                )
-            )
-        )
+        Mockito.`when`(roomRepo.searchRooms(request.features, request.population, -1))
+            .thenReturn(listOf(tehran, mashhad))
         Mockito.`when`(meetingCrud.findAllInsideTimeInterval(request.timeInterval.start, request.timeInterval.end))
             .thenReturn(setOf<Meeting>(Meeting(request, mashhadId)))
         Mockito.`when`(roomRepo.findAllByIds(listOf(mashhadId))).thenReturn(listOf(mashhad))
@@ -117,4 +102,18 @@ class RoomSelectorTest {
         Assertions.assertEquals(1, rooms.size)
     }
 
+    @Test
+    fun `getBestRoomChoice should return the room with less capacity`() {
+        val fixture = kotlinFixture {
+            repeatCount { 7 } //to make sure the number of request participants is 7
+            factory<Feature> { Feature.WHITE_BOARD }
+            factory<MeetingPurpose> { MeetingPurpose.GROOMING }
+            factory<Office> { Office.TEHRAN }
+        }
+        val request = fixture<TimedMeetingRequest>()
+        Mockito.`when`(roomRepo.searchRooms(request.features, request.population, -1))
+            .thenReturn(listOf(tehran, mashhad))
+        val roomId = roomSelector.getBestRoomChoice(request)
+        Assertions.assertEquals(mashhad.id, roomId)
+    }
 }
