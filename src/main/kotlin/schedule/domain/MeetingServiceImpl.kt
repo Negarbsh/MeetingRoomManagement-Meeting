@@ -99,7 +99,7 @@ class MeetingServiceImpl(
     }
 
     override fun searchMeeting(meetingSearchRequest: MeetingSearchRequest): Set<Meeting> {
-        var searchResult = meetingCRUD.findAllInsideTimeInterval(
+        var searchResult = meetingCRUD.findAllInterferingWithInterval(
             meetingSearchRequest.timeInterval.start,
             meetingSearchRequest.timeInterval.end
         )
@@ -111,6 +111,6 @@ class MeetingServiceImpl(
     }
 
     override fun getMeetingsInInterval(interval: TimeInterval): Set<Meeting> {
-        return meetingCRUD.findAllInsideTimeInterval(interval.start, interval.end)
+        return meetingCRUD.findAllInterferingWithInterval(interval.start, interval.end)
     }
 }

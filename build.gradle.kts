@@ -35,7 +35,7 @@ dependencies {
     implementation("junit:junit:4.13.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.mockito:mockito-core:3.12.4")
+    testImplementation("org.mockito:mockito-core:4.3.1")
     testImplementation("com.appmattus.fixture:fixture:1.2.0")
 
     implementation("io.grpc:grpc-kotlin-stub:1.2.1")

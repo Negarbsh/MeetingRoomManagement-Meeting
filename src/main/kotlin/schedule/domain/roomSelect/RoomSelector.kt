@@ -5,5 +5,5 @@ import org.bson.types.ObjectId
 
 interface RoomSelector {
     /* Along all possible rooms, optimizes the room with the least capacity */
-    fun getBestRoomChoice(meetingRequest: TimedMeetingRequest): ObjectId?
+    fun getBestRoomChoice(meetingRequest: TimedMeetingRequest?): ObjectId?
 }

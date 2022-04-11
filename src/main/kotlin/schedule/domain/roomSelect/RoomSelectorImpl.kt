@@ -15,7 +15,8 @@ class RoomSelectorImpl(
     @Autowired val meetingDAO: MeetingCRUD, @Autowired val roomDAO: RoomRepo
 ) : RoomSelector {
 
-    override fun getBestRoomChoice(meetingRequest: TimedMeetingRequest): ObjectId? {
+    override fun getBestRoomChoice(meetingRequest: TimedMeetingRequest?): ObjectId? {
+        if(meetingRequest == null) return null
         val possibleRooms = getAllPossibleRooms(meetingRequest)
         var bestRoomId: ObjectId? = null
         var minCapacity = -1
@@ -53,6 +54,6 @@ class RoomSelectorImpl(
     }
 
     private fun getMeetingsInInterval(timeInterval: TimeInterval, meetingDAO: MeetingCRUD): List<Meeting> {
-        return ArrayList(meetingDAO.findAllInsideTimeInterval(timeInterval.start, timeInterval.end))
+        return ArrayList(meetingDAO.findAllInterferingWithInterval(timeInterval.start, timeInterval.end))
     }
 }

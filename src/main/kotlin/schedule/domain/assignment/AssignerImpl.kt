@@ -13,14 +13,14 @@ import java.time.Instant
 
 @Service
 class AssignerImpl(
-    @Autowired val meetingDAO: MeetingCRUD,
-    @Autowired val roomSearcher: RoomSelector,
+    @Autowired val meetingRepo: MeetingCRUD,
+    @Autowired val roomSelector: RoomSelector,
 ) : Assigner {
 
     private val notifier: Notifier = NotifierImpl()
 
     override fun scheduleFixedTimeMeeting(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
-        val roomId: ObjectId? = roomSearcher.getBestRoomChoice(timedMeetingRequest)
+        val roomId: ObjectId? = roomSelector.getBestRoomChoice(timedMeetingRequest)
         if (roomId != null)
             return finalizeMeetingCreation(timedMeetingRequest, roomId)
         return null
@@ -37,7 +37,7 @@ class AssignerImpl(
     /*Inserts the meeting in the database and returns the meetingId*/
     private fun insertMeetingInDb(timedMeetingRequest: TimedMeetingRequest, roomId: ObjectId): ObjectId? {
         val meeting = Meeting(timedMeetingRequest, roomId)
-        return meetingDAO.insert(meeting).meetingId
+        return meetingRepo.insert(meeting).meetingId
     }
 
     //todo It can be cleaner!
@@ -58,7 +58,7 @@ class AssignerImpl(
 
             if (!areParticipantsFree(meetingRequest.participants, TimeInterval(startTime, endTime))) continue
             val timedMeetingRequest = TimedMeetingRequest(meetingRequest, TimeInterval(startTime, endTime))
-            val roomId = roomSearcher.getBestRoomChoice(timedMeetingRequest) ?: continue
+            val roomId = roomSelector.getBestRoomChoice(timedMeetingRequest) ?: continue
             return Pair(roomId, startTime)
         }
         return null
@@ -68,16 +68,18 @@ class AssignerImpl(
         participants: List<Participant>,
         timeInterval: TimeInterval
     ): Boolean {
-        val meetingsToCheck = getMeetingsInInterval(timeInterval, meetingDAO)
+        val meetingsToCheck = getMeetingsInInterval(timeInterval, meetingRepo)
         for (meeting in meetingsToCheck) {
-            val commonParticipants = meeting.participants.intersect(participants.toSet())
-            if (commonParticipants.isNotEmpty()) return false
+            if (meeting.timeInterval.isInterfering(timeInterval)) {
+                val commonParticipants = meeting.participants.intersect(participants.toSet())
+                if (commonParticipants.isNotEmpty()) return false
+            }
         }
         return true
     }
 
-    private fun getMeetingsInInterval(interval: TimeInterval, meetingDAO: MeetingCRUD): Set<Meeting> {
-        return meetingDAO.findAllInsideTimeInterval(interval.start, interval.end)
+    private fun getMeetingsInInterval(interval: TimeInterval, meetingRepo: MeetingCRUD): Set<Meeting> {
+        return meetingRepo.findAllInterferingWithInterval(interval.start, interval.end)
     }
 
 }

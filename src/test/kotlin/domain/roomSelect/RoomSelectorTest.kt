@@ -1,4 +1,4 @@
-package domain.assignment.roomSelect
+package domain.roomSelect
 
 import com.appmattus.kotlinfixture.kotlinFixture
 import org.bson.types.ObjectId
@@ -46,7 +46,6 @@ class RoomSelectorTest {
     @BeforeEach
     fun init() {
         MockitoAnnotations.openMocks(this)
-
         Mockito.`when`(roomRepo.findAllRooms()).thenReturn(
             listOf(tehran, shiraz, mashhad)
         )
@@ -94,7 +93,7 @@ class RoomSelectorTest {
         val request = fixture<TimedMeetingRequest>()
         Mockito.`when`(roomRepo.searchRooms(request.features, request.population, -1))
             .thenReturn(listOf(tehran, mashhad))
-        Mockito.`when`(meetingCrud.findAllInsideTimeInterval(request.timeInterval.start, request.timeInterval.end))
+        Mockito.`when`(meetingCrud.findAllInterferingWithInterval(request.timeInterval.start, request.timeInterval.end))
             .thenReturn(setOf<Meeting>(Meeting(request, mashhadId)))
         Mockito.`when`(roomRepo.findAllByIds(listOf(mashhadId))).thenReturn(listOf(mashhad))
 
