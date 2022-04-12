@@ -18,6 +18,7 @@ import schedule.dao.roomGrpc.RoomRepoImpl
 import schedule.domain.MeetingServiceImpl
 import schedule.domain.assignment.AssignerImpl
 import schedule.domain.assignment.reassignment.ReassignerImpl
+import schedule.model.MeetingSearchRequest
 import schedule.model.Room
 import schedule.model.enums.Feature
 import schedule.model.enums.Office
@@ -136,4 +137,59 @@ class MeetingServiceTest {
         Assertions.assertTrue(isCanceled)
         verify(meetingCRUD, atLeastOnce()).deleteById(any())
     }
+
+    @Test
+    fun `edit should return null when the meeting doesn't exist`() {
+        Mockito.`when`(meetingCRUD.existsById(any())).thenReturn(false)
+        val editedMeetingId = meetingService.edit(fixture(), fixture())
+        Assertions.assertNull(editedMeetingId)
+    }
+
+    @Test
+    fun `edit should cancel and then schedule if the meeting exists`() {
+        Mockito.`when`(meetingCRUD.existsById(any())).thenReturn(true)
+        val editedMeetingId = meetingService.edit(fixture(), fixture())
+        //todo how do I check this without caring about the already tested functions?
+    }
+
+    @Test
+    fun `getMeetingsInInterval should call and return the meetingCrud same method`() {
+        val expectedInterferingMeetings = fixture<Set<Meeting>>()
+        Mockito.`when`(meetingCRUD.findAllInterferingWithInterval(any(), any())).thenReturn(expectedInterferingMeetings)
+        val meetingsInInterval = meetingService.getMeetingsInInterval(fixture())
+        Assertions.assertEquals(expectedInterferingMeetings, meetingsInInterval)
+        verify(meetingCRUD, atLeastOnce()).findAllInterferingWithInterval(any(), any())
+    }
+
+    @Test
+    fun `search meetings with specific interval when roomId is null`() {
+        val meetingSearchFixture = kotlinFixture { factory<ObjectId?> { null } }
+        val meetingSearchRequest = meetingSearchFixture<MeetingSearchRequest>()
+        val expectedMeetings = fixture<Set<Meeting>>()
+
+        Mockito.`when`(meetingCRUD.findAllInterferingWithInterval(any(), any())).thenReturn(expectedMeetings)
+        val searchResult = meetingService.searchMeeting(meetingSearchRequest)
+
+        Assertions.assertEquals(expectedMeetings, searchResult)
+    }
+
+    @Test
+    fun `search meetings with specific roomId and interval`() {
+        val requestFixture = kotlinFixture {
+            factory<ObjectId?> { fixture<ObjectId>() } //to make sure the room id won't be null
+        }
+        val meetingSearchRequest = requestFixture<MeetingSearchRequest>()
+        val timeMatchedMeetings = fixture<Set<Meeting>>()
+        val roomMatchedMeetings = fixture<ArrayList<Meeting>>()
+        roomMatchedMeetings.addAll(timeMatchedMeetings)
+
+        Mockito.`when`(meetingCRUD.findAllInterferingWithInterval(any(), any())).thenReturn(timeMatchedMeetings)
+        Mockito.`when`(meetingCRUD.findAllByRoomId(any())).thenReturn(roomMatchedMeetings)
+        val searchRequest = meetingService.searchMeeting(meetingSearchRequest)
+
+        Assertions.assertEquals(
+            timeMatchedMeetings.intersect(roomMatchedMeetings.toSet()), searchRequest
+        )
+    }
+
 }
