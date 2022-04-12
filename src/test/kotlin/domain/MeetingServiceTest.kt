@@ -10,7 +10,9 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import schedule.dao.MeetingCRUD
 import schedule.dao.roomGrpc.RoomRepoImpl
 import schedule.domain.MeetingServiceImpl
@@ -118,5 +120,20 @@ class MeetingServiceTest {
             .thenReturn(mockedMeetingChance)
         val meetingChance = meetingService.getEarliestMeetingChance(timeLowerBound, request)
         Assertions.assertEquals(mockedMeetingChance, meetingChance)
+    }
+
+    @Test
+    fun `cancel should return false if the meeting doesn't exist`() {
+        Mockito.`when`(meetingCRUD.existsById(any())).thenReturn(false)
+        val isCanceled = meetingService.cancel(fixture())
+        Assertions.assertFalse(isCanceled)
+    }
+
+    @Test
+    fun `cancel successfully when the meeting exists`() {
+        Mockito.`when`(meetingCRUD.existsById(any())).thenReturn(true)
+        val isCanceled = meetingService.cancel(fixture())
+        Assertions.assertTrue(isCanceled)
+        verify(meetingCRUD, atLeastOnce()).deleteById(any())
     }
 }

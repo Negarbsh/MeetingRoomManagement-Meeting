@@ -90,12 +90,9 @@ class MeetingServiceImpl(
     }
 
     override fun cancel(meetingId: ObjectId): Boolean {
-        return try {
-            meetingCRUD.deleteById(meetingId)
-            true
-        } catch (e: Exception) {
-            false
-        }
+        if (!meetingCRUD.existsById(meetingId)) return false
+        meetingCRUD.deleteById(meetingId)
+        return true
     }
 
     override fun searchMeeting(meetingSearchRequest: MeetingSearchRequest): Set<Meeting> {
