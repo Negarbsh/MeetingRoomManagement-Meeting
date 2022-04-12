@@ -23,19 +23,19 @@ class MeetingServiceImpl(
     override fun schedule(timedMeetingRequest: TimedMeetingRequest): ObjectId? {
         val roomId = meetingAssigner.scheduleFixedTimeMeeting(timedMeetingRequest)
         if (roomId != null) return roomId
-        val reassignResult = handlerReassignment(timedMeetingRequest) ?: return null
+        val reassignResult = handleReassignment(timedMeetingRequest) ?: return null
         val (changedMeetings, newRoomId) = reassignResult
         val meetingId = meetingAssigner.finalizeMeetingCreation(timedMeetingRequest, newRoomId)
-        resetDB(changedMeetings)
+        overwriteMeetings(changedMeetings)
         return meetingId
     }
 
-    private fun resetDB(overwritingMeetings: List<Meeting>?) {
+    private fun overwriteMeetings(overwritingMeetings: List<Meeting>?) {
         if (overwritingMeetings == null) return
         meetingCRUD.saveAll(overwritingMeetings)
     }
 
-    private fun handlerReassignment(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>, ObjectId>? {
+    private fun handleReassignment(timedMeetingRequest: TimedMeetingRequest): Pair<List<Meeting>, ObjectId>? {
         val rooms: List<Room> = roomDAO.findAllRooms()
         val reassignAlgorithmLevels = 5
         val meetings = ArrayList(getRequiredMeetingsForReassign(timedMeetingRequest, reassignAlgorithmLevels))

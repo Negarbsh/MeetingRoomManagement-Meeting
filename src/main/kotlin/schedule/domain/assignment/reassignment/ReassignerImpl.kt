@@ -31,13 +31,10 @@ class ReassignerImpl : Reassigner {
         val roomsPossibleByAttributes = searchRoomsByAttribute(allRooms, newMeetingRequest)
         candidateRoomLoop@ for (candidateRoom in roomsPossibleByAttributes) {
             val meetingsToChange = getInterferingMeetings(candidateRoom, meetings, newMeetingRequest.timeInterval)
-            if (meetingsToChange.isEmpty()) return Pair(
-                meetings,
-                candidateRoom.id
-            ) // if there was no interfering meeting, we are good to go
+            if (meetingsToChange.isEmpty()) return Pair(meetings, candidateRoom.id)
+            // if there was no interfering meeting, we are good to go
             var imaginaryMeetingList = arrayListOf<Meeting>()
             imaginaryMeetingList.addAll(meetings)
-//            var imaginaryMeetingList = ArrayList(meetings)
             imaginaryMeetingList.add(
                 Meeting(
                     newMeetingRequest,

@@ -9,10 +9,10 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 import schedule.dao.MeetingCRUD
 import schedule.domain.assignment.AssignerImpl
-import schedule.domain.roomSelect.RoomSelector
-import org.mockito.ArgumentMatchers.*
+import schedule.domain.roomSelect.RoomSelectorImpl
 import schedule.model.Room
 import schedule.model.meeting.*
 import java.sql.Timestamp
@@ -20,13 +20,11 @@ import java.util.Date
 
 class AssignerTest {
 
-    //todo mock the notificationService
-
     @InjectMocks
     lateinit var assigner: AssignerImpl
 
     @Mock
-    lateinit var roomSelector: RoomSelector
+    lateinit var roomSelector: RoomSelectorImpl
 
     @Mock
     lateinit var meetingRepo: MeetingCRUD
@@ -53,7 +51,7 @@ class AssignerTest {
         val request = fixture<TimedMeetingRequest>()
 
         Mockito.`when`(roomSelector.getBestRoomChoice(request)).thenReturn(fixture<ObjectId>())
-        Mockito.`when`(meetingRepo.insert(any(Meeting::class.java))).thenReturn(randomMeeting)
+        Mockito.`when`(meetingRepo.insert(any<Meeting>() )).thenReturn(randomMeeting)
         val meetingId = assigner.scheduleFixedTimeMeeting(request)
 
         Assertions.assertEquals(randomMeeting.meetingId, meetingId)
@@ -64,7 +62,7 @@ class AssignerTest {
         val randomMeeting = fixture<Meeting>()
         val request = fixture<TimedMeetingRequest>()
 
-        Mockito.`when`(meetingRepo.insert(any(Meeting::class.java))).thenReturn(randomMeeting)
+        Mockito.`when`(meetingRepo.insert(any<Meeting>())).thenReturn(randomMeeting)
         val meetingId = assigner.finalizeMeetingCreation(request, randomMeeting.roomId)
 
         Assertions.assertEquals(randomMeeting.meetingId, meetingId)
@@ -72,8 +70,7 @@ class AssignerTest {
 
     @Test
     fun `getEarliestMeetingChance should return null when no room is available ever`() {
-        //todo find out how to make sure that the method argument won't be null
-        Mockito.`when`(roomSelector.getBestRoomChoice(any(TimedMeetingRequest::class.java))).thenReturn(null)
+        Mockito.`when`(roomSelector.getBestRoomChoice(any())).thenReturn(null)
         val bestMeetingChance =
             assigner.getEarliestMeetingChance(fixture<Timestamp>(), fixture(), 5, 100)
         Assertions.assertEquals(null, bestMeetingChance)
@@ -86,12 +83,12 @@ class AssignerTest {
         val requestTime = Timestamp(Date().time)
         val anHourLater = Timestamp(requestTime.time + 1000 * 3600)
 
-        Mockito.`when`(roomSelector.getBestRoomChoice(any(TimedMeetingRequest::class.java))).thenReturn(room.id)
+        Mockito.`when`(roomSelector.getBestRoomChoice(any())).thenReturn(room.id)
 
         // we make the participants busy from now until 1 hour
         val meetingFixture = kotlinFixture {
             factory<Participant> { request.participants.first() }
-            factory<TimeInterval> { TimeInterval(requestTime, Timestamp(anHourLater.time - 1000 * 60 * 5)) }
+            factory<TimeInterval> { TimeInterval(requestTime, Timestamp(anHourLater.time - 1000 * 60 * 1)) }
         }
         Mockito.`when`(meetingRepo.findAllInterferingWithInterval(any(), any())).thenReturn(setOf(meetingFixture()))
 
@@ -103,7 +100,7 @@ class AssignerTest {
             val roomId = meetingChance.first
             val meetingStart = meetingChance.second
             Assertions.assertEquals(room.id, roomId)
-            Assertions.assertTrue(meetingStart.after(anHourLater))
+            Assertions.assertFalse(meetingStart.before(anHourLater))
         }
     }
 
