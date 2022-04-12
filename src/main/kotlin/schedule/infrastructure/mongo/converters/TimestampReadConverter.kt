@@ -1,4 +1,4 @@
-package schedule.converters
+package schedule.infrastructure.mongo.converters
 
 import org.springframework.core.convert.converter.Converter
 import java.sql.Timestamp

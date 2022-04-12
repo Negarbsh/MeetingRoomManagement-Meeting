@@ -5,10 +5,10 @@ import schedule.model.Room
 import schedule.model.enums.Feature
 import schedule.model.meeting.TimedMeetingRequest
 import org.bson.types.ObjectId
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import schedule.model.meeting.TimeInterval
 
-@Component
+@Service
 class ReassignerImpl : Reassigner {
 
     override fun reassignByMeeting(
@@ -29,6 +29,7 @@ class ReassignerImpl : Reassigner {
     ): Pair<ArrayList<Meeting>, ObjectId>? {
         if (algorithmLevel <= 0) return null
         val roomsPossibleByAttributes = searchRoomsByAttribute(allRooms, newMeetingRequest)
+
         candidateRoomLoop@ for (candidateRoom in roomsPossibleByAttributes) {
             val meetingsToChange = getInterferingMeetings(candidateRoom, meetings, newMeetingRequest.timeInterval)
             if (meetingsToChange.isEmpty()) return Pair(meetings, candidateRoom.id)

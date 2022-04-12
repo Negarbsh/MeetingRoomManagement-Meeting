@@ -147,9 +147,13 @@ class MeetingServiceTest {
 
     @Test
     fun `edit should cancel and then schedule if the meeting exists`() {
+        val expectedMeetingId = fixture<ObjectId>()
+
         Mockito.`when`(meetingCRUD.existsById(any())).thenReturn(true)
+        Mockito.`when`(assigner.scheduleFixedTimeMeeting(any())).thenReturn(expectedMeetingId)
         val editedMeetingId = meetingService.edit(fixture(), fixture())
-        //todo how do I check this without caring about the already tested functions?
+
+        Assertions.assertEquals(expectedMeetingId, editedMeetingId)
     }
 
     @Test

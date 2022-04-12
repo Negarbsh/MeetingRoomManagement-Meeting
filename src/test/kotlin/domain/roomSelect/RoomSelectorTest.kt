@@ -1,7 +1,6 @@
 package domain.roomSelect
 
 import com.appmattus.kotlinfixture.kotlinFixture
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,17 +29,15 @@ class RoomSelectorTest {
     @Mock
     lateinit var meetingCrud: MeetingCRUD
 
-    private val mashhadId = ObjectId("000000642d276104ab000064")
-    private val shirazId = ObjectId("000000642d276104ab000065")
-    private val tehranId = ObjectId("000000642d276104ab000066")
+    val idFixture = kotlinFixture()
     private val mashhad = Room(
-        mashhadId, "mashhad", Office.TEHRAN, listOf(Feature.WHITE_BOARD, Feature.PROJECTOR), 8
+        idFixture(), "mashhad", Office.TEHRAN, listOf(Feature.WHITE_BOARD, Feature.PROJECTOR), 8
     )
     private val shiraz = Room(
-        shirazId, "shiraz", Office.TEHRAN, listOf(Feature.WHITE_BOARD, Feature.SOUND_PROOF), 6
+        idFixture(), "shiraz", Office.TEHRAN, listOf(Feature.WHITE_BOARD, Feature.SOUND_PROOF), 6
     )
     private val tehran = Room(
-        tehranId, "tehran", Office.TEHRAN, listOf(Feature.PROJECTOR, Feature.WHITE_BOARD, Feature.SOUND_PROOF), 20
+        idFixture(), "tehran", Office.TEHRAN, listOf(Feature.PROJECTOR, Feature.WHITE_BOARD, Feature.SOUND_PROOF), 20
     )
 
     @BeforeEach
@@ -61,21 +58,7 @@ class RoomSelectorTest {
         }
         val request = fixture<TimedMeetingRequest>()
         Mockito.`when`(roomRepo.searchRooms(request.features, request.population, -1)).thenReturn(
-            listOf(
-                Room(
-                    ObjectId(),
-                    "tehran",
-                    Office.TEHRAN,
-                    listOf(Feature.PROJECTOR, Feature.WHITE_BOARD, Feature.SOUND_PROOF),
-                    20
-                ), Room(
-                    ObjectId("000000642d276104ab000064"),
-                    "mashhad",
-                    Office.TEHRAN,
-                    listOf(Feature.WHITE_BOARD, Feature.PROJECTOR),
-                    8
-                )
-            )
+            listOf(tehran, mashhad)
         )
 
         val rooms = roomSelector.getAllPossibleRooms(request)
@@ -94,8 +77,8 @@ class RoomSelectorTest {
         Mockito.`when`(roomRepo.searchRooms(request.features, request.population, -1))
             .thenReturn(listOf(tehran, mashhad))
         Mockito.`when`(meetingCrud.findAllInterferingWithInterval(request.timeInterval.start, request.timeInterval.end))
-            .thenReturn(setOf<Meeting>(Meeting(request, mashhadId)))
-        Mockito.`when`(roomRepo.findAllByIds(listOf(mashhadId))).thenReturn(listOf(mashhad))
+            .thenReturn(setOf<Meeting>(Meeting(request, mashhad.id)))
+        Mockito.`when`(roomRepo.findAllByIds(listOf(mashhad.id))).thenReturn(listOf(mashhad))
 
         val rooms = roomSelector.getAllPossibleRooms(request)
         Assertions.assertEquals(1, rooms.size)
