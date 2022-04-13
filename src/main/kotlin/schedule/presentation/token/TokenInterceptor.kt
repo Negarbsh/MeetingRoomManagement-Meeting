@@ -16,7 +16,8 @@ class TokenInterceptor : HandlerInterceptor {
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         return try {
             val payLoad: String = tokenHandler.checkJWTToken(request, response)
-            return authorizationHandler.hasAccess(payLoad, request)
+//            val payLoad = "{\"is_admin\" : true}"
+            authorizationHandler.hasAccess(payLoad, request)
         } catch (e: Exception) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), e.message)
             false

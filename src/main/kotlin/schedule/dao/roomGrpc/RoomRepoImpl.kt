@@ -38,13 +38,11 @@ class RoomRepoImpl : RoomRepo {
 
     //todo move it to the room system
     override fun findById(roomId: ObjectId?): Room? {
-        if(roomId == null) return null
+        if (roomId == null) return null
         val rooms: List<Room> = findAllRooms()
         for (room in rooms) {
-            if(room.id == roomId) return room
+            if (room.id == roomId) return room
         }
         return null
     }
-
-
 }

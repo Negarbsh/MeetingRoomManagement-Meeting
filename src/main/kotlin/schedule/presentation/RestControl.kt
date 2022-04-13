@@ -50,7 +50,7 @@ class RestControl(
         return ResponseEntity("$meetingId", HttpStatus.CREATED)
     }
 
-    @GetMapping("/scheduleEarliestChance")
+    @GetMapping("/getEarliestChance")
     fun getMeetingEarliestChance(@RequestBody meetingRequest: MeetingRequest): ResponseEntity<String> {
         val response = meetingService.getEarliestMeetingChance(meetingRequest = meetingRequest)
             ?: return ResponseEntity("No room is free for this meeting.", HttpStatus.NOT_ACCEPTABLE)
@@ -79,7 +79,7 @@ class RestControl(
         return ResponseEntity(HttpStatus.CONFLICT)
     }
 
-    @GetMapping("/searchMeeting")
+    @GetMapping("/search")
     fun getMeetings(@RequestBody meetingSearchRequest: MeetingSearchRequest): ResponseEntity<String> {
         val meetings = meetingService.searchMeeting(meetingSearchRequest)
         val listString: String = meetings.stream().map { obj: Any -> obj.toString() }
